@@ -104,7 +104,7 @@ async fn get_wish(
     let mut end_id = String::from("0");
     let mut data: Vec<GenshinItem> = vec![];
     'outer: loop {
-        sleep(Duration::from_micros(200)).await;
+        sleep(Duration::from_millis(200)).await;
         let url = format!("{}&gacha_type={}&page={}&size=20&end_id={}", raw_url, gacha_type, page, end_id);
         let result = reqwest::get(url).await.unwrap().text().await.unwrap();
         //println!("{}\n", result);
