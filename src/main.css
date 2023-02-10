@@ -1,0 +1,10 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.Main{
+    margin: 40px 10px 50px 10px;
+    display: flex;
+    justify-content: space-between;
+}
