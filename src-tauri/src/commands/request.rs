@@ -1,6 +1,7 @@
-use crate::commands::{State, GenshinState, Arc, Mutex, Connection, Deserialize};
+use crate::commands::{State, GenshinState, Error, Arc, Mutex, Connection, Deserialize};
 use crate::genshin::{find_game_data_dir, find_recent_gacha_url};
 use tokio::time::{sleep, Duration};
+use regex::Regex;
 
 #[derive(Deserialize)]
 struct GenshinResponse<T> {
@@ -32,7 +33,7 @@ struct GenshinItem {
     id: String,
 }
 #[tauri::command]
-pub async fn prepare(state: State<'_, GenshinState>) -> Result<String, ()> {
+pub async fn prepare(state: State<'_, GenshinState>) -> Result<String, Error> {
     let tmp = match find_game_data_dir() {
         None => { return Ok("无法找到原神目录".to_string()); }
         Some(data) => { data }
@@ -43,7 +44,7 @@ pub async fn prepare(state: State<'_, GenshinState>) -> Result<String, ()> {
         Some(data) => { data.url }
     };
     // println!("{}",url);
-    let response = reqwest::get(&url).await.unwrap().text().await.unwrap();
+    let response = reqwest::get(&url).await?.text().await?;
     let result: serde_json::error::Result<GenshinResponse<GenshinData>> = serde_json::from_str(&response);
     let uid: String = match result {
         Ok(mut data) => {
@@ -53,6 +54,10 @@ pub async fn prepare(state: State<'_, GenshinState>) -> Result<String, ()> {
         Err(_) => { return Ok("祈愿链接已过期".to_string()); }
     };
     let raw_url = url.split("&gacha_type").next().unwrap().to_owned();
+    println!("{}",raw_url);
+    let re=Regex::new("&lang=.*?&").unwrap();
+    let raw_url=re.replace(&raw_url,"&lang=zh-cn&").to_string();
+    println!("{}",raw_url);
     let mut path = std::env::current_exe().unwrap();
     path.pop();
     path.push(uid.clone());
@@ -64,14 +69,14 @@ pub async fn prepare(state: State<'_, GenshinState>) -> Result<String, ()> {
 }
 
 #[tauri::command]
-pub async fn get_wishes(state: State<'_, GenshinState>) -> Result<String, ()> {
+pub async fn get_wishes(state: State<'_, GenshinState>) -> Result<(), Error> {
     let mut end_id_character = 0;
     let mut end_id_weapon = 0;
     let mut end_id_standard = 0;
     {
         let connection = state.db.lock().await;
         let connection = connection.as_ref().unwrap();
-        let get_end_id = |str: &str| {
+        let get_end_id = |str: &str|{
             let mut statement = connection.prepare(format!("SELECT id from {} order by id DESC LIMIT 1;", str)).unwrap();
             statement.next().unwrap();
             statement.read::<i64, _>("id").unwrap()
@@ -88,10 +93,10 @@ pub async fn get_wishes(state: State<'_, GenshinState>) -> Result<String, ()> {
     let dbl1 = Arc::clone(&state.db);
     let dbl2 = Arc::clone(&state.db);
     let dbl3 = Arc::clone(&state.db);
-    get_wish(dbl1,strl,"301","character_wish",end_id_character).await;
-    get_wish(dbl2,strlc1,"302","weapon_wish",end_id_weapon).await;
-    get_wish(dbl3,strlc2,"200","standard_wish",end_id_standard).await;
-    Ok("".to_string())
+    get_wish(dbl1,strl,"301","character_wish",end_id_character).await?;
+    get_wish(dbl2,strlc1,"302","weapon_wish",end_id_weapon).await?;
+    get_wish(dbl3,strlc2,"200","standard_wish",end_id_standard).await?;
+    Ok(())
 }
 
 async fn get_wish(
@@ -99,14 +104,14 @@ async fn get_wish(
     raw_url: Arc<String>,
     gacha_type: &str,
     table_name: &str,
-    last: i64) {
+    last: i64)->Result<(),Error>{
     let mut page = 1;
     let mut end_id = String::from("0");
     let mut data: Vec<GenshinItem> = vec![];
     'outer: loop {
         sleep(Duration::from_millis(200)).await;
         let url = format!("{}&gacha_type={}&page={}&size=20&end_id={}", raw_url, gacha_type, page, end_id);
-        let result = reqwest::get(url).await.unwrap().text().await.unwrap();
+        let result = reqwest::get(url).await?.text().await?;
         //println!("{}\n", result);
         let result: GenshinResponse<GenshinData> = serde_json::from_str(&result).unwrap();
         let list = result.data.list;
@@ -129,25 +134,27 @@ async fn get_wish(
     }
     let connection=locker.lock().await;
     let connection=connection.as_ref().unwrap();
-    write_database(connection,data,table_name);
+    write_database(connection,data,table_name)?;
     println!("{} ok",table_name);
+    Ok(())
 }
 
-fn write_database(connection: &Connection, items: Vec<GenshinItem>, table_name: &str) {
+fn write_database(connection: &Connection, items: Vec<GenshinItem>, table_name: &str)->Result<(),Error> {
     for item in items.iter().rev() {
-        let mut statement = connection.prepare(format!("select item_id,name from item_list where name='{}';", &item.name)).unwrap();
+        let mut statement = connection.prepare(format!("select item_id,name from item_list where name='{}';", &item.name))?;
         statement.next().unwrap();
-        let mut item_id = statement.read::<i64, _>("item_id").unwrap();
+        let mut item_id = statement.read::<i64, _>("item_id")?;
         if item_id == 0 {
             let mut item_type = 0;//0代表武器,1代表角色
             if &item.item_type == "角色" {
                 item_type = 1;
             }
-            connection.execute(format!("INSERT INTO item_list(name,'type','rank') VALUES('{}',{},{});", &item.name, item_type, &item.rank_type)).unwrap();
-            statement = connection.prepare(format!("select item_id,name from item_list where name='{}';", &item.name)).unwrap();
-            statement.next().unwrap();
-            item_id = statement.read::<i64, _>("item_id").unwrap();
+            connection.execute(format!("INSERT INTO item_list(name,'type','rank') VALUES('{}',{},{});", &item.name, item_type, &item.rank_type))?;
+            statement = connection.prepare(format!("select item_id,name from item_list where name='{}';", &item.name))?;
+            statement.next()?;
+            item_id = statement.read::<i64, _>("item_id")?;
         }
-        connection.execute(format!("INSERT INTO {} VALUES({},'{}',{})", table_name, item_id, &item.time, &item.id)).unwrap();
+        connection.execute(format!("INSERT INTO {} VALUES({},'{}',{})", table_name, item_id, &item.time, &item.id))?;
     }
+    Ok(())
 }

@@ -57,11 +57,12 @@
       {
         "minHeight": 600,
         "minWidth": 800,
-        "fullscreen": false,
         "height": 600,
+        "width": 800,
+        "center": true,
+        "fullscreen": false,
         "resizable": true,
         "title": "原神抽卡分析 by: Wed0n",
-        "width": 800,
         "transparent": false,
         "decorations": true
       }

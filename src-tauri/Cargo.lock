@@ -906,12 +906,14 @@ dependencies = [
  "byteorder",
  "chrono",
  "lazy_static",
+ "regex",
  "reqwest",
  "serde",
  "serde_json",
  "sqlite",
  "tauri",
  "tauri-build",
+ "thiserror",
  "tokio",
 ]
 
