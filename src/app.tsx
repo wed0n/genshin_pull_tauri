@@ -6,7 +6,9 @@ import Dialog from './dialog'
 import SideBar from './SideBar';
 import Main from './main';
 import Count from "./count";
+import PrepareProgress from './prepareprogress';
 import './main.css';
+import { appWindow } from '@tauri-apps/api/window';
 
 const theme = createTheme({
     palette: {
@@ -16,64 +18,52 @@ const theme = createTheme({
 
 class App extends React.Component<{},
     {
-        str?: string,
-        uid?: number,
+        isPrepared: boolean,
+        uid?: string,
         isError: boolean,
-        content: String
+        wishMessage:String,
+        errorMessage: String
     }>{
     constructor(props: any) {
         super(props);
-        this.state = { str: undefined, uid: undefined, isError: false, content: '' };
+        this.state = { uid: undefined, isPrepared: false, isError: false,wishMessage:'', errorMessage: '' };
+    }
+    async chanel(){
+        await appWindow.listen("wish",(event)=>{this.setState({...this.state, wishMessage:event.payload as String});});
     }
     async componentDidMount() {
         try {
             debugger;
-            if (this.state.uid == undefined) {
-                let result = await invoke('prepare') as string;
-                let uid = parseInt(result);
-                if (!Number.isNaN(uid)) {
-                    this.setState({ str: result });
-                    await invoke('get_wishes');
-                    this.setState({ str: 'ok', uid: uid });
-                } else {
-                    this.setState({ str: result });
-                }
-            }
+            let uid = await invoke('prepare') as string;
+            this.setState({ ...this.state, uid: uid });
+            this.chanel();
+            await invoke('get_wishes');
+            this.setState({ ...this.state, isPrepared: true });
         } catch (error) {
-            this.setState({ ...this.state, isError: true, content: error as String });
+            console.log(error);
+            this.setState({ ...this.state, isError: true, errorMessage: error as String });
         }
     }
     render() {
         let target;
-        if (this.state.str != undefined) {
-            if (this.state.uid != undefined) {
-                target =
-                    <>
-                        <SideBar uid={this.state.uid}/>
-                        <Routes>
-                            <Route path="/" element={<Main />} />
-                            <Route path="count" element={<Count />} />
-                        </Routes>
-                    </>;
-            }
-            else {
-                target = <Box>
-                    <CircularProgress></CircularProgress>
-                    {this.state.str}
-                </Box>
-            }
+        if (this.state.uid != undefined && this.state.isPrepared == true) {
+            target =
+                <>
+                    <SideBar uid={this.state.uid} />
+                    <Routes>
+                        <Route path="/" element={<Main />} />
+                        <Route path="count" element={<Count />} />
+                    </Routes>
+                </>;
         }
         else {
-            target =
-                <Box>
-                    <CircularProgress></CircularProgress>
-                </Box>
+            target = <PrepareProgress message={this.state.wishMessage} />
         }
         return (
             <BrowserRouter>
                 <ThemeProvider theme={theme}>
                     <Paper square elevation={0} sx={{ width: 1, height: 1, display: "flex" }}>
-                        <Dialog open={this.state.isError} content={this.state.content}></Dialog>
+                        <Dialog open={this.state.isError} errorMessage={this.state.errorMessage}></Dialog>
                         {target}
                     </Paper>
                 </ThemeProvider>

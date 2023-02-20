@@ -1,7 +1,8 @@
-use crate::commands::{State, GenshinState, Error, Arc, Mutex, Connection, Deserialize};
+use crate::commands::{State, GenshinState, Error,Error::Other, Arc, Mutex, Connection, Deserialize};
 use crate::genshin::{find_game_data_dir, find_recent_gacha_url};
 use tokio::time::{sleep, Duration};
 use regex::Regex;
+use tauri::Window;
 
 #[derive(Deserialize)]
 struct GenshinResponse<T> {
@@ -35,12 +36,12 @@ struct GenshinItem {
 #[tauri::command]
 pub async fn prepare(state: State<'_, GenshinState>) -> Result<String, Error> {
     let tmp = match find_game_data_dir() {
-        None => { return Ok("无法找到原神目录".to_string()); }
+        None => { return Err(Other("无法找到游戏目录".to_string())); }
         Some(data) => { data }
     };
     let path = tmp.as_path();
     let url = match find_recent_gacha_url(path) {
-        None => { return Ok("无法找到祈愿链接".to_string()); }
+        None => { return Err(Other("无法找到祈愿链接".to_string())); }
         Some(data) => { data.url }
     };
     // println!("{}",url);
@@ -48,20 +49,18 @@ pub async fn prepare(state: State<'_, GenshinState>) -> Result<String, Error> {
     let result: serde_json::error::Result<GenshinResponse<GenshinData>> = serde_json::from_str(&response);
     let uid: String = match result {
         Ok(mut data) => {
-            println!("{}", response);
+            //println!("{}", response);
             data.data.list.pop().unwrap().uid
         }
-        Err(_) => { return Ok("祈愿链接已过期".to_string()); }
+        Err(_) => { return Err(Other("祈愿链接已过期".to_string())); }
     };
     let raw_url = url.split("&gacha_type").next().unwrap().to_owned();
-    println!("{}",raw_url);
     let re=Regex::new("&lang=.*?&").unwrap();
     let raw_url=re.replace(&raw_url,"&lang=zh-cn&").to_string();
-    println!("{}",raw_url);
     let mut path = std::env::current_exe().unwrap();
     path.pop();
     path.push(uid.clone());
-    let db = sqlite::open(path).unwrap();
+    let db = sqlite::open(path)?;
     db.execute("PRAGMA foreign_keys=ON;CREATE TABLE IF NOT EXISTS item_list (item_id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,'type' INTEGER NOT NULL,'rank' INTEGER NOT NULL);CREATE TABLE IF NOT EXISTS character_wish (item_id INTEGER NOT NULL,time TEXT(19) NOT NULL,id INTEGER PRIMARY KEY NOT NULL,CONSTRAINT FK FOREIGN KEY (item_id) REFERENCES item_list(item_id));CREATE TABLE IF NOT EXISTS weapon_wish (item_id INTEGER NOT NULL,time TEXT(19) NOT NULL,id INTEGER PRIMARY KEY NOT NULL,CONSTRAINT FK FOREIGN KEY (item_id) REFERENCES item_list(item_id));CREATE TABLE IF NOT EXISTS standard_wish (item_id INTEGER NOT NULL,time TEXT(19) NOT NULL,id INTEGER PRIMARY KEY NOT NULL,CONSTRAINT FK FOREIGN KEY (item_id) REFERENCES item_list(item_id));").unwrap();
     *state.db.lock().await = Some(db);
     *state.raw_url.lock().await = raw_url;
@@ -69,7 +68,7 @@ pub async fn prepare(state: State<'_, GenshinState>) -> Result<String, Error> {
 }
 
 #[tauri::command]
-pub async fn get_wishes(state: State<'_, GenshinState>) -> Result<(), Error> {
+pub async fn get_wishes(window: Window, state: State<'_, GenshinState>) -> Result<(), Error> {
     let mut end_id_character = 0;
     let mut end_id_weapon = 0;
     let mut end_id_standard = 0;
@@ -93,23 +92,29 @@ pub async fn get_wishes(state: State<'_, GenshinState>) -> Result<(), Error> {
     let dbl1 = Arc::clone(&state.db);
     let dbl2 = Arc::clone(&state.db);
     let dbl3 = Arc::clone(&state.db);
-    get_wish(dbl1,strl,"301","character_wish",end_id_character).await?;
-    get_wish(dbl2,strlc1,"302","weapon_wish",end_id_weapon).await?;
-    get_wish(dbl3,strlc2,"200","standard_wish",end_id_standard).await?;
+    let window1=Arc::new(window);
+    let window2=Arc::clone(&window1);
+    let window3=Arc::clone(&window1);
+    get_wish(dbl1,strl,window1,"301","character_wish",end_id_character).await?;
+    get_wish(dbl2,strlc1,window2,"302","weapon_wish",end_id_weapon).await?;
+    get_wish(dbl3,strlc2,window3,"200","standard_wish",end_id_standard).await?;
     Ok(())
 }
 
 async fn get_wish(
     locker: Arc<Mutex<Option<Connection>>>,
     raw_url: Arc<String>,
+    window: Arc<Window>,
     gacha_type: &str,
     table_name: &str,
     last: i64)->Result<(),Error>{
     let mut page = 1;
     let mut end_id = String::from("0");
     let mut data: Vec<GenshinItem> = vec![];
+    let wish_name=get_wish_name(gacha_type);
     'outer: loop {
-        sleep(Duration::from_millis(200)).await;
+        sleep(Duration::from_millis(100)).await;
+        window.emit("wish",format!("正在获取 {} 第{}页",wish_name,page))?;
         let url = format!("{}&gacha_type={}&page={}&size=20&end_id={}", raw_url, gacha_type, page, end_id);
         let result = reqwest::get(url).await?.text().await?;
         //println!("{}\n", result);
@@ -157,4 +162,16 @@ fn write_database(connection: &Connection, items: Vec<GenshinItem>, table_name: 
         connection.execute(format!("INSERT INTO {} VALUES({},'{}',{})", table_name, item_id, &item.time, &item.id))?;
     }
     Ok(())
+}
+
+fn get_wish_name(gacha_type:&str)->&str{
+    if gacha_type=="301"{
+        "角色活动祈愿"
+    }
+    else if gacha_type=="302"{
+        "武器活动祈愿"
+    }
+    else{
+        "常驻祈愿"
+    }
 }

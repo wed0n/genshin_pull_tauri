@@ -4,7 +4,7 @@ import MailIcon from '@mui/icons-material/Mail';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import React from 'react';
 const drawerWidth = 240;
-let SideBar = (props:{uid:number}) => {
+let SideBar = (props:{uid:string}) => {
     const [selectedIndex, setSelectedIndex] = React.useState(0);
     const handleListItemClick = (
         event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -45,7 +45,7 @@ let SideBar = (props:{uid:number}) => {
                     </ListItemButton>
                 </ListItem>
             </List>
-            <Typography variant='subtitle1' sx={{marginTop:'auto',marginBottom:1,marginX:3,textAlign:'center'}}>UID: {props.uid}</Typography>
+            <Typography variant='h6' sx={{marginTop:'auto',marginBottom:2,marginX:3,textAlign:'center'}}>UID: {props.uid}</Typography>
         </Drawer>
     )
 }

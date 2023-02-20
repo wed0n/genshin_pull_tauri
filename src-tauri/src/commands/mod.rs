@@ -1,3 +1,5 @@
+use std::fmt;
+use std::fmt::Formatter;
 use std::sync::Arc;
 
 use serde::{Deserialize, Serialize};
@@ -33,7 +35,11 @@ pub enum Error {
     #[error(transparent)]
     Network(#[from] reqwest::Error),
     #[error(transparent)]
-    Sql(#[from]sqlite::Error)
+    Sql(#[from]sqlite::Error),
+    #[error(transparent)]
+    Tauri(#[from]tauri::Error),
+    #[error("{0}")]
+    Other(String)
 }
 
 // we must manually implement serde::Serialize
