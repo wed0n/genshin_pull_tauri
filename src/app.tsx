@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeProvider, createTheme, Paper, Box, CircularProgress } from '@mui/material';
+import { ThemeProvider, createTheme, Paper } from '@mui/material';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { invoke } from '@tauri-apps/api'
 import Dialog from './dialog'
@@ -7,7 +7,6 @@ import SideBar from './SideBar';
 import Main from './main';
 import Count from "./count";
 import PrepareProgress from './prepareprogress';
-import './main.css';
 import { appWindow } from '@tauri-apps/api/window';
 
 const theme = createTheme({
@@ -21,15 +20,15 @@ class App extends React.Component<{},
         isPrepared: boolean,
         uid?: string,
         isError: boolean,
-        wishMessage:String,
+        wishMessage: String,
         errorMessage: String
     }>{
     constructor(props: any) {
         super(props);
-        this.state = { uid: undefined, isPrepared: false, isError: false,wishMessage:'', errorMessage: '' };
+        this.state = { uid: undefined, isPrepared: false, isError: false, wishMessage: '正在获取祈愿链接中', errorMessage: '' };
     }
-    async chanel(){
-        await appWindow.listen("wish",(event)=>{this.setState({...this.state, wishMessage:event.payload as String});});
+    async chanel() {
+        await appWindow.listen("wish", (event) => { this.setState({ ...this.state, wishMessage: event.payload as String }); });
     }
     async componentDidMount() {
         try {
