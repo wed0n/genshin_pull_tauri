@@ -7,12 +7,12 @@ mod genshin;
 mod disk_cache;
 mod commands;
 
-use commands::{GenshinState, prepare,get_wishes,count_wishes,statistic_wishes};
+use commands::{GenshinState, prepare,get_wishes,count_wishes,statistic_wishes,group_count};
 
 fn main() {
     tauri::Builder::default()
         .manage(GenshinState { db: Default::default(), raw_url: Default::default() })
-        .invoke_handler(tauri::generate_handler![prepare,get_wishes,count_wishes,statistic_wishes])
+        .invoke_handler(tauri::generate_handler![prepare,get_wishes,count_wishes,statistic_wishes,group_count])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

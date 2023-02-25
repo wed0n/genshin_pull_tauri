@@ -1,44 +1,18 @@
 import { Box, Paper, Typography, Table, TableBody, TableContainer, TableCell, TableHead, TableRow, CircularProgress } from '@mui/material';
 import React from 'react';
 import { invoke } from '@tauri-apps/api'
+import {GenshinCount,GenshinResult} from './interfaces'
 
-interface GenshinCount {
-  name: string,
-  count: number,
-  time: string
-}
-interface GenshinCounts {
-  character: GenshinCount,
-  weapon: GenshinCount,
-  standard: GenshinCount
-}
-
-class Test extends React.Component<{},
-  {
-    str: string,
-    genshinCounts?: GenshinCounts
-  }>{
-  constructor(props: any) {
+class Count extends React.Component<{genshinCounts:GenshinResult<GenshinCount>},{}>{
+  constructor(props:any) {
     super(props);
-    this.state = { str: "", genshinCounts: undefined };
   }
   async componentDidMount() {
-    let result = await invoke('count_wishes') as GenshinCounts;
+    let result = await invoke('count_wishes') as GenshinResult<GenshinCount>;
     this.setState({ str: 'ok', genshinCounts: result });
     console.log(result);
   }
   render() {
-    let target;
-    if (this.state.genshinCounts != undefined) {
-      console.log(JSON.stringify(this.state.genshinCounts));
-      target = <>
-        <PullTable name='角色活动祈愿' genshinCount={this.state.genshinCounts.character} />
-        <PullTable name='武器活动祈愿' genshinCount={this.state.genshinCounts.weapon} />
-        <PullTable name='常驻祈愿' genshinCount={this.state.genshinCounts.standard} />
-      </>
-    } else {
-      target = <CircularProgress></CircularProgress>
-    }
     return (
       <Box sx={{
         paddingTop: 1,
@@ -48,13 +22,14 @@ class Test extends React.Component<{},
         justifyContent: 'center',
         overflowX: 'hidden'//摆烂了
       }}>
-        {target}
+        <PullTable name='角色活动祈愿' genshinCount={this.props.genshinCounts.character} />
+        <PullTable name='武器活动祈愿' genshinCount={this.props.genshinCounts.weapon} />
+        <PullTable name='常驻祈愿' genshinCount={this.props.genshinCounts.standard} />
       </Box>
     )
   }
 }
 const PullTable = (props: any) => {
-  console.log(props.genshinCount.current);
   return (
     <Paper sx={{ marginY: 2, marginX: 3 }} elevation={3}>
       <Typography variant='h6' sx={{ marginTop: 1, marginLeft: 1 }}>{props.name}</Typography>
@@ -85,4 +60,4 @@ const PullTable = (props: any) => {
     </Paper>
   )
 }
-export default Test;
+export default Count;

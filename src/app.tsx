@@ -2,10 +2,12 @@ import React from 'react';
 import { ThemeProvider, createTheme, Paper } from '@mui/material';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { invoke } from '@tauri-apps/api'
+import { GenshinCount, GenshinResult, GenshinStatistic, GroupData } from './interfaces'
 import Dialog from './dialog'
-import SideBar from './SideBar';
+import SideBar from './sideBar';
 import Main from './main';
 import Count from "./count";
+import Pie from './pie';
 import PrepareProgress from './prepareprogress';
 import { appWindow } from '@tauri-apps/api/window';
 
@@ -21,11 +23,14 @@ class App extends React.Component<{},
         uid?: string,
         isError: boolean,
         wishMessage: String,
-        errorMessage: String
+        errorMessage: String,
+        groupData?: GenshinResult<GroupData>,
+        countData?: GenshinResult<GenshinCount>,
+        statisticData?: GenshinResult<Array<GenshinStatistic>>
     }>{
     constructor(props: any) {
         super(props);
-        this.state = { uid: undefined, isPrepared: false, isError: false, wishMessage: '正在获取祈愿链接中', errorMessage: '' };
+        this.state = { isPrepared: false, isError: false, wishMessage: '正在获取祈愿链接中', errorMessage: '' };
     }
     async chanel() {
         await appWindow.listen("wish", (event) => { this.setState({ ...this.state, wishMessage: event.payload as String }); });
@@ -37,7 +42,16 @@ class App extends React.Component<{},
             this.setState({ ...this.state, uid: uid });
             this.chanel();
             await invoke('get_wishes');
-            this.setState({ ...this.state, isPrepared: true });
+            let group_count_data = await invoke('group_count') as GenshinResult<GroupData>;
+            let count_result = await invoke('count_wishes') as GenshinResult<GenshinCount>;
+            let statistic_result = await invoke('statistic_wishes') as GenshinResult<Array<GenshinStatistic>>;
+            this.setState({
+                ...this.state,
+                isPrepared: true,
+                groupData: group_count_data,
+                countData: count_result,
+                statisticData: statistic_result
+            });
         } catch (error) {
             console.log(error);
             this.setState({ ...this.state, isError: true, errorMessage: error as String });
@@ -50,8 +64,9 @@ class App extends React.Component<{},
                 <>
                     <SideBar uid={this.state.uid} />
                     <Routes>
-                        <Route path="/" element={<Main />} />
-                        <Route path="count" element={<Count />} />
+                        <Route path="/" element={<Main genshinCounts={this.state.countData as GenshinResult<GenshinCount>} />} />
+                        <Route path="pie" element={<Pie data={this.state.groupData as GenshinResult<GroupData>} />} />
+                        <Route path="count" element={<Count genshinStatistics={this.state.statisticData as GenshinResult<Array<GenshinStatistic>>} />} />
                     </Routes>
                 </>;
         }

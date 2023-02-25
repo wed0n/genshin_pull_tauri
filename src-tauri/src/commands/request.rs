@@ -1,4 +1,4 @@
-use crate::commands::{State, GenshinState, Error,Error::Other, Arc, Mutex, Connection, Deserialize};
+use crate::commands::{State, GenshinState, Error,Error::Other, Arc, Mutex, Connection, Deserialize,get_wish_name};
 use crate::genshin::{find_game_data_dir, find_recent_gacha_url};
 use tokio::time::{sleep, Duration};
 use regex::Regex;
@@ -162,16 +162,4 @@ fn write_database(connection: &Connection, items: Vec<GenshinItem>, table_name: 
         connection.execute(format!("INSERT INTO {} VALUES({},'{}',{})", table_name, item_id, &item.time, &item.id))?;
     }
     Ok(())
-}
-
-fn get_wish_name(gacha_type:&str)->&str{
-    if gacha_type=="301"{
-        "角色活动祈愿"
-    }
-    else if gacha_type=="302"{
-        "武器活动祈愿"
-    }
-    else{
-        "常驻祈愿"
-    }
 }

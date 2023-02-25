@@ -1,35 +1,17 @@
 import { Box, Paper, Typography, Table, TableBody, TableContainer, TableCell, TableHead, TableRow, CircularProgress } from '@mui/material';
 import React from 'react';
 import { invoke } from '@tauri-apps/api'
+import { GenshinResult, GenshinStatistic } from './interfaces'
 
-interface GenshinStatistic {
-  name: string,
-  count: number,
-}
-interface GenshinStatistics {
-  character: GenshinStatistic,
-  weapon: GenshinStatistic,
-  standard: GenshinStatistic
-}
-
-class Statistic extends React.Component<{},
-  {
-    str: string,
-    genshinStatistics?: GenshinStatistics
-  }>{
+class Statistic extends React.Component<
+  { genshinStatistics: GenshinResult<Array<GenshinStatistic>> },
+  {}>{
   constructor(props: any) {
     super(props);
-    this.state = { str: "", genshinStatistics: undefined };
-  }
-  async componentDidMount() {
-    let result = await invoke('statistic_wishes') as GenshinStatistics;
-    this.setState({ str: "", genshinStatistics: result });
   }
   render() {
-    let target;
-    if (this.state.genshinStatistics != undefined) {
-      console.log(JSON.stringify(this.state.genshinStatistics));
-      target = <Box sx={{
+    return (
+      <Box sx={{
         paddingTop: 1,
         flexGrow: 1,
         display: 'flex',
@@ -37,20 +19,10 @@ class Statistic extends React.Component<{},
         justifyContent: 'center',
         overflowX: 'hidden'//摆烂了
       }}>
-        <PullTable name='角色活动祈愿' genshinCount={this.state.genshinStatistics.character} />
-        <PullTable name='武器活动祈愿' genshinCount={this.state.genshinStatistics.weapon} />
-        <PullTable name='常驻祈愿' genshinCount={this.state.genshinStatistics.standard} />
+        <PullTable name='角色活动祈愿' genshinCount={this.props.genshinStatistics.character} />
+        <PullTable name='武器活动祈愿' genshinCount={this.props.genshinStatistics.weapon} />
+        <PullTable name='常驻祈愿' genshinCount={this.props.genshinStatistics.standard} />
       </Box>
-    } else {
-      target = <Box>
-        <CircularProgress></CircularProgress>
-        {this.state.str}
-      </Box>
-    }
-    return (
-      <>
-        {target}
-      </>
     )
   }
 }
@@ -68,7 +40,6 @@ const PullTable = (props: any) => {
             </TableRow>
           </TableHead>
           <TableBody>
-
             {props.genshinCount.map((row: GenshinStatistic) => (
               <TableRow
                 key={row.name}
