@@ -1,4 +1,4 @@
-use crate::commands::{State, GenshinState, Error,Error::Other, Arc, Mutex, Connection, Deserialize,get_wish_name};
+use crate::commands::{State, GenshinState, Error, Error::Other, Arc, Mutex, Connection, Deserialize, WishType, CHARACTER_WISH, WEAPON_WISH, STANDARD_WISH};
 use crate::genshin::{find_game_data_dir, find_recent_gacha_url};
 use tokio::time::{sleep, Duration};
 use regex::Regex;
@@ -69,9 +69,9 @@ pub async fn prepare(state: State<'_, GenshinState>) -> Result<String, Error> {
 
 #[tauri::command]
 pub async fn get_wishes(window: Window, state: State<'_, GenshinState>) -> Result<(), Error> {
-    let mut end_id_character = 0;
-    let mut end_id_weapon = 0;
-    let mut end_id_standard = 0;
+    let end_id_character:i64;
+    let end_id_weapon:i64;
+    let end_id_standard:i64;
     {
         let connection = state.db.lock().await;
         let connection = connection.as_ref().unwrap();
@@ -95,9 +95,9 @@ pub async fn get_wishes(window: Window, state: State<'_, GenshinState>) -> Resul
     let window1=Arc::new(window);
     let window2=Arc::clone(&window1);
     let window3=Arc::clone(&window1);
-    get_wish(dbl1,strl,window1,"301","character_wish",end_id_character).await?;
-    get_wish(dbl2,strlc1,window2,"302","weapon_wish",end_id_weapon).await?;
-    get_wish(dbl3,strlc2,window3,"200","standard_wish",end_id_standard).await?;
+    get_wish(dbl1,strl,window1,&CHARACTER_WISH,end_id_character).await?;
+    get_wish(dbl2,strlc1,window2,&WEAPON_WISH,end_id_weapon).await?;
+    get_wish(dbl3,strlc2,window3,&STANDARD_WISH,end_id_standard).await?;
     Ok(())
 }
 
@@ -105,16 +105,17 @@ async fn get_wish(
     locker: Arc<Mutex<Option<Connection>>>,
     raw_url: Arc<String>,
     window: Arc<Window>,
-    gacha_type: &str,
-    table_name: &str,
+    wish_type:&WishType,
     last: i64)->Result<(),Error>{
+    let gacha_type=wish_type.gacha_type;
+    let table_name=wish_type.table_name;
     let mut page = 1;
     let mut end_id = String::from("0");
     let mut data: Vec<GenshinItem> = vec![];
-    let wish_name=get_wish_name(gacha_type);
+    let gacha_name =wish_type.gacha_name;
     'outer: loop {
         sleep(Duration::from_millis(100)).await;
-        window.emit("wish",format!("正在获取 {} 第{}页",wish_name,page))?;
+        window.emit("wish",format!("正在获取 {} 第{}页", gacha_name, page))?;
         let url = format!("{}&gacha_type={}&page={}&size=20&end_id={}", raw_url, gacha_type, page, end_id);
         let result = reqwest::get(url).await?.text().await?;
         //println!("{}\n", result);

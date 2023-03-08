@@ -1,4 +1,4 @@
-use crate::commands::{State,GenshinState,GenshinResult,Error,Serialize};
+use crate::commands::{State, GenshinState, GenshinResult, Error, Serialize, CHARACTER_WISH, WEAPON_WISH, STANDARD_WISH};
 
 #[derive(Serialize)]
 pub struct GenshinCountItem{
@@ -40,12 +40,9 @@ pub async fn count_wishes(state: State<'_,GenshinState>) -> Result<GenshinResult
         }
         Ok(GenshinCount{ current, items })
     };
-    let character_wish=closure("character_wish")?;
-    let weapon_wish=closure("weapon_wish")?;
-    let standard_wish=closure("standard_wish")?;
     Ok(GenshinResult {
-        character: character_wish,
-        weapon: weapon_wish,
-        standard: standard_wish
+        character: closure(CHARACTER_WISH.table_name)?,
+        weapon: closure(WEAPON_WISH.table_name)?,
+        standard: closure(STANDARD_WISH.table_name)?
     })
 }

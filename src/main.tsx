@@ -7,11 +7,6 @@ class Count extends React.Component<{genshinCounts:GenshinResult<GenshinCount>},
   constructor(props:any) {
     super(props);
   }
-  async componentDidMount() {
-    let result = await invoke('count_wishes') as GenshinResult<GenshinCount>;
-    this.setState({ str: 'ok', genshinCounts: result });
-    console.log(result);
-  }
   render() {
     return (
       <Box sx={{

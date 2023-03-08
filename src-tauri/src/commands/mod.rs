@@ -1,5 +1,3 @@
-use std::fmt;
-use std::fmt::Formatter;
 use std::sync::Arc;
 
 use serde::{Deserialize, Serialize};
@@ -16,6 +14,27 @@ mod request;
 mod statistic;
 mod count;
 mod group_count;
+
+struct WishType{
+    gacha_type:&'static str,
+    table_name:&'static str,
+    gacha_name:&'static str
+}
+static CHARACTER_WISH: WishType =WishType{
+    gacha_type: "301",
+    table_name: "character_wish",
+    gacha_name: "角色活动祈愿"
+};
+static WEAPON_WISH: WishType=WishType{
+    gacha_type: "302",
+    table_name: "weapon_wish",
+    gacha_name: "武器活动祈愿"
+};
+static STANDARD_WISH: WishType=WishType{
+    gacha_type: "200",
+    table_name: "standard_wish",
+    gacha_name: "常驻祈愿"
+};
 
 #[derive(Serialize)]
 pub struct GenshinResult<T> {
@@ -50,29 +69,5 @@ impl serde::Serialize for Error {
         where S: serde::ser::Serializer
     {
         serializer.serialize_str(self.to_string().as_ref())
-    }
-}
-
-fn get_wish_name(gacha_type:&str)->&str{
-    if gacha_type=="301"{
-        "角色活动祈愿"
-    }
-    else if gacha_type=="302"{
-        "武器活动祈愿"
-    }
-    else{
-        "常驻祈愿"
-    }
-}
-
-fn get_wish_name_table(gacha_type:&str)->&str{
-    if gacha_type=="character_wish"{
-        "角色活动祈愿"
-    }
-    else if gacha_type=="weapon_wish"{
-        "武器活动祈愿"
-    }
-    else{
-        "常驻祈愿"
     }
 }
