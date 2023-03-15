@@ -29,3 +29,15 @@ export interface GenshinCountItem{
     count:number,
     time:string
 }
+export interface GenshinTimeLine{
+    total:number,
+    begin_time:string,
+    end_time:string,
+    items:Array<GenshinTimeLineItem>
+}
+export interface GenshinTimeLineItem {
+    time: string,
+    star5: number,
+    star4: number,
+    star3: number
+}

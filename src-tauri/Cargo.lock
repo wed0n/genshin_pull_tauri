@@ -914,6 +914,7 @@ dependencies = [
  "tauri",
  "tauri-build",
  "thiserror",
+ "time",
  "tokio",
 ]
 

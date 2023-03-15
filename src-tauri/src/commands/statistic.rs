@@ -10,7 +10,7 @@ pub async fn statistic_wishes(state: State<'_,GenshinState>) -> Result<GenshinRe
     let connection = state.db.lock().await;
     let connection = connection.as_ref().unwrap();
     let closure=|table:&str|->Result<Vec<GenshinStatisticItem>,Error>{
-        let mut statement=connection.prepare(format!("SELECT name,type,rank,count(id) from item_list,{} WHERE item_list.item_id={}.item_id group by item_list.item_id ORDER by count(id) DESC,rank DESC,type DESC;",table,table))?;
+        let mut statement=connection.prepare(format!("SELECT name,type,rank,count(id) from item_list,{} WHERE item_list.item_id={}.item_id group by item_list.item_id ORDER by rank DESC,count(id) DESC,type DESC;",table,table))?;
         let mut items:Vec<GenshinStatisticItem>=vec![];
         while let Ok(sqlite::State::Row) = statement.next() {
             let name = statement.read::<String, _>("name")?;

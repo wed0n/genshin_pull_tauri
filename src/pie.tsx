@@ -1,17 +1,25 @@
 import React from 'react';
-import {GenshinResult,GroupData} from './interfaces'
+import { GenshinResult, GenshinTimeLine, GroupData } from './interfaces'
 import { EChartsOption } from 'echarts-for-react';
 import { Box } from '@mui/material';
 import ReactEChartsCore from 'echarts-for-react/lib/core';
 import * as echarts from 'echarts/core';
-import {TooltipComponent,TitleComponent,LegendComponent} from 'echarts/components';
-import {PieChart} from 'echarts/charts';
-import {CanvasRenderer} from 'echarts/renderers';
+import { TooltipComponent, TitleComponent, LegendComponent } from 'echarts/components';
+import { PieChart } from 'echarts/charts';
+import { CanvasRenderer, SVGRenderer } from 'echarts/renderers';
+import Timeline from './timeline';
 
-echarts.use([PieChart,TooltipComponent,TitleComponent,LegendComponent, CanvasRenderer]);
+echarts.use([PieChart, TooltipComponent, TitleComponent, LegendComponent, CanvasRenderer]);
 
-function SinglePie(props:{data:GroupData}) {
+function SinglePie(props: { data: GroupData }) {
     let option: EChartsOption = {
+        color: [
+            '#F5AE1E',
+            '#FFD173',
+            '#CC66FF',
+            '#CC99FF',
+            '#6ABCE6',
+        ],
         title: {
             text: props.data.name,
             left: 'center',
@@ -23,7 +31,7 @@ function SinglePie(props:{data:GroupData}) {
         legend: {
             top: 30,
             left: 'center',
-            selected:{'三星武器':false},
+            selected: { '三星武器': false },
         },
         series: [
             {
@@ -39,13 +47,13 @@ function SinglePie(props:{data:GroupData}) {
                 },
                 label: {
                     show: false,
-                    position: 'bottom'
+                    position: 'center'
                 },
                 emphasis: {
                     label: {
                         show: false,
-                        fontSize: 30,
-                        fontWeight: 'bold'
+                        fontSize: 20,
+                        fontWeight: 'bold',
                     }
                 },
                 labelLine: {
@@ -62,25 +70,29 @@ function SinglePie(props:{data:GroupData}) {
         ]
     };
     return (
-        <Box sx={{ width: 360,marginX:2,marginY:2}}>
+        <Box sx={{ width: 360, marginX: 2, marginY: 2 }}>
             <ReactEChartsCore echarts={echarts} option={option} />
         </Box>
     );
 }
-export default function Pie(props: {data:GenshinResult<GroupData>}) {
+export default function Pie(props: { data: GenshinResult<GroupData>,timelineData:GenshinTimeLine }) {
     return (
         <Box sx={{
             paddingTop: 2,
-            flexGrow: 1,
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
             overflowX: 'hidden'//摆烂了
-        }}
-        >
-            <SinglePie data={props.data.character}/>
-            <SinglePie data={props.data.weapon}/>
-            <SinglePie data={props.data.standard}/>
-        </Box>
+        }} >
+            <Timeline data={props.timelineData}/>
+            <Box sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                overflowX: 'hidden'//摆烂了
+            }}
+            >
+                <SinglePie data={props.data.character} />
+                <SinglePie data={props.data.weapon} />
+                <SinglePie data={props.data.standard} />
+            </Box>
+        </ Box>
     );
 }

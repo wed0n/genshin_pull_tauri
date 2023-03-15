@@ -9,11 +9,13 @@ pub use count::*;
 pub use request::*;
 pub use statistic::*;
 pub use group_count::*;
+pub use timeline::*;
 
 mod request;
 mod statistic;
 mod count;
 mod group_count;
+mod timeline;
 
 struct WishType{
     gacha_type:&'static str,
