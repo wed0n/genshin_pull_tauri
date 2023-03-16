@@ -1,6 +1,5 @@
 import { Box, Paper, Typography, Table, TableBody, TableContainer, TableCell, TableHead, TableRow, CircularProgress } from '@mui/material';
 import React from 'react';
-import { invoke } from '@tauri-apps/api'
 import { GenshinResult, GenshinStatistic } from './interfaces'
 
 class Statistic extends React.Component<

@@ -20,20 +20,20 @@ export interface GenshinCount {
     count: number,
     time: string
 }
-export interface GenshinCount{
-    current:number,
-    items:Array<GenshinCountItem>
+export interface GenshinCount {
+    current: number,
+    items: Array<GenshinCountItem>
 }
-export interface GenshinCountItem{
-    name:string,
-    count:number,
-    time:string
+export interface GenshinCountItem {
+    name: string,
+    count: number,
+    time: string
 }
-export interface GenshinTimeLine{
-    total:number,
-    begin_time:string,
-    end_time:string,
-    items:Array<GenshinTimeLineItem>
+export interface GenshinTimeLine {
+    total: number,
+    begin_time: string,
+    end_time: string,
+    items: Array<GenshinTimeLineItem>
 }
 export interface GenshinTimeLineItem {
     time: string,

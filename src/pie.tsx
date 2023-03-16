@@ -1,4 +1,3 @@
-import React from 'react';
 import { GenshinResult, GenshinTimeLine, GroupData } from './interfaces'
 import { EChartsOption } from 'echarts-for-react';
 import { Box } from '@mui/material';
@@ -6,7 +5,7 @@ import ReactEChartsCore from 'echarts-for-react/lib/core';
 import * as echarts from 'echarts/core';
 import { TooltipComponent, TitleComponent, LegendComponent } from 'echarts/components';
 import { PieChart } from 'echarts/charts';
-import { CanvasRenderer, SVGRenderer } from 'echarts/renderers';
+import { CanvasRenderer} from 'echarts/renderers';
 import Timeline from './timeline';
 
 echarts.use([PieChart, TooltipComponent, TitleComponent, LegendComponent, CanvasRenderer]);

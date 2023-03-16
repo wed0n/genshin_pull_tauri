@@ -8,7 +8,6 @@ import SideBar from './sideBar';
 import Main from './main';
 import Count from "./count";
 import Pie from './pie';
-import TimeLine from './timeline'
 import PrepareProgress from './prepareprogress';
 import { appWindow } from '@tauri-apps/api/window';
 

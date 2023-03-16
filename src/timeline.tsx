@@ -2,17 +2,17 @@ import ReactEChartsCore from 'echarts-for-react/lib/core';
 import * as echarts from 'echarts/core';
 import { TooltipComponent, TitleComponent, LegendComponent, GridComponent, DataZoomComponent, ToolboxComponent, MarkPointComponent } from 'echarts/components';
 import { BarChart } from 'echarts/charts';
-import { CanvasRenderer, SVGRenderer } from 'echarts/renderers';
+import { CanvasRenderer } from 'echarts/renderers';
 import { Box } from '@mui/material';
 import { EChartsOption } from 'echarts-for-react';
 import { GenshinTimeLine } from './interfaces';
 echarts.use([BarChart, TooltipComponent, TitleComponent, LegendComponent, CanvasRenderer, GridComponent, DataZoomComponent, ToolboxComponent, MarkPointComponent]);
-export default function TimeLine(props: {data:GenshinTimeLine}) {
-    let xAxis=[];
-    let star5=[];
-    let star4=[];
-    let star3=[];
-    for(let item of props.data.items){
+export default function TimeLine(props: { data: GenshinTimeLine }) {
+    let xAxis = [];
+    let star5 = [];
+    let star4 = [];
+    let star3 = [];
+    for (let item of props.data.items) {
         xAxis.push(item.time);
         star5.push(item.star5);
         star4.push(item.star4);
@@ -20,7 +20,7 @@ export default function TimeLine(props: {data:GenshinTimeLine}) {
     }
     let option: EChartsOption = {
         color: ['#6ABCE6', '#CC99FF', '#FFD173'],
-        legend: {top: 25},
+        legend: { top: 25 },
         title: {
             "left": "center",
             "text": `${props.data.begin_time} - ${props.data.end_time} (共${props.data.total}抽)`,
@@ -715,7 +715,7 @@ export default function TimeLine(props: {data:GenshinTimeLine}) {
             ]
         }; */
     return (
-        <Box sx={{ width: 900,marginX: 'auto', marginY: 2}}>
+        <Box sx={{ width: 900, marginX: 'auto', marginY: 2 }}>
             <ReactEChartsCore echarts={echarts} option={option} />
         </Box>
     );
