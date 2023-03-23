@@ -1,4 +1,3 @@
-use sqlite::Connection;
 use time::{Date, Time};
 use crate::commands::{State, GenshinState, GenshinResult, Error, Serialize, CHARACTER_WISH, WEAPON_WISH, STANDARD_WISH, WishType};
 use time::macros::{date, format_description};

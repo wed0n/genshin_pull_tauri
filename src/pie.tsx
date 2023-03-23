@@ -5,7 +5,7 @@ import ReactEChartsCore from 'echarts-for-react/lib/core';
 import * as echarts from 'echarts/core';
 import { TooltipComponent, TitleComponent, LegendComponent } from 'echarts/components';
 import { PieChart } from 'echarts/charts';
-import { CanvasRenderer} from 'echarts/renderers';
+import { CanvasRenderer } from 'echarts/renderers';
 import Timeline from './timeline';
 
 echarts.use([PieChart, TooltipComponent, TitleComponent, LegendComponent, CanvasRenderer]);
@@ -74,13 +74,13 @@ function SinglePie(props: { data: GroupData }) {
         </Box>
     );
 }
-export default function Pie(props: { data: GenshinResult<GroupData>,timelineData:GenshinTimeLine }) {
+export default function Pie(props: { data: GenshinResult<GroupData>, timelineData: GenshinTimeLine }) {
     return (
         <Box sx={{
             paddingTop: 2,
             overflowX: 'hidden'//摆烂了
         }} >
-            <Timeline data={props.timelineData}/>
+            <Timeline data={props.timelineData} />
             <Box sx={{
                 display: 'flex',
                 flexWrap: 'wrap',
@@ -92,6 +92,6 @@ export default function Pie(props: { data: GenshinResult<GroupData>,timelineData
                 <SinglePie data={props.data.weapon} />
                 <SinglePie data={props.data.standard} />
             </Box>
-        </ Box>
+        </Box>
     );
 }
