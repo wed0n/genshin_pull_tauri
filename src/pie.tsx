@@ -1,16 +1,18 @@
-import { GenshinResult, GenshinTimeLine, GroupData } from './interfaces'
+import { GenshinPullsTableItem, GenshinResult, GenshinTimeLine, GroupData } from './interfaces'
 import { EChartsOption } from 'echarts-for-react';
-import { Box } from '@mui/material';
+import { Box, Dialog, DialogContent } from '@mui/material';
 import ReactEChartsCore from 'echarts-for-react/lib/core';
 import * as echarts from 'echarts/core';
 import { TooltipComponent, TitleComponent, LegendComponent } from 'echarts/components';
 import { PieChart } from 'echarts/charts';
 import { CanvasRenderer } from 'echarts/renderers';
-import Timeline from './timeline';
+import Timeline, { DayPullsTable } from './timeline';
+import { useRef, useState } from 'react';
+import { invoke } from '@tauri-apps/api';
 
 echarts.use([PieChart, TooltipComponent, TitleComponent, LegendComponent, CanvasRenderer]);
 
-function SinglePie(props: { data: GroupData }) {
+function SinglePie(props: { data: GroupData, message:{tableName:string,gachaType:number},outData: React.MutableRefObject<GenshinPullsTableItem[]>, opened: React.MutableRefObject<boolean>}) {
     let option: EChartsOption = {
         color: [
             '#F5AE1E',
@@ -70,17 +72,47 @@ function SinglePie(props: { data: GroupData }) {
     };
     return (
         <Box sx={{ width: 360, marginX: 2, marginY: 2 }}>
-            <ReactEChartsCore echarts={echarts} option={option} />
+            <ReactEChartsCore echarts={echarts} option={option}
+                onEvents={{
+                    click: (args: {dataIndex:number}) => {
+                        let rank,itemType;
+                        if(args.dataIndex==4){
+                            rank=3;
+                            itemType=0;
+                        }
+                        else{
+                            rank=5-Math.floor(args.dataIndex/2);
+                            itemType=(args.dataIndex%2+1)%2;
+                        }
+                        
+                        (async ()=>{
+                            let result:GenshinPullsTableItem[] = await invoke("get_pulls_by_group",{gachaType: props.message.gachaType, tableName: props.message.tableName, itemType: itemType,rank:rank});
+                            props.outData.current=result;
+                            props.opened.current=true;
+                        })();
+                    }
+                }} />
         </Box>
     );
 }
 export default function Pie(props: { data: GenshinResult<GroupData>, timelineData: GenshinTimeLine }) {
+    const opened = useRef(false);
+    const outData = useRef([] as GenshinPullsTableItem[]);
     return (
         <Box sx={{
             paddingTop: 2,
             overflowX: 'hidden'//摆烂了
         }} >
-            <Timeline data={props.timelineData} />
+            <Dialog fullWidth={true} maxWidth="md" open={opened.current} onClose={
+                () => {
+                    opened.current=false;
+                    //setData([]);
+                }}>
+                <DialogContent id="dialogTable" >
+                    <DayPullsTable data={outData.current} />
+                </DialogContent>
+            </Dialog>
+            <Timeline data={props.timelineData} outData={outData} opened={opened} />
             <Box sx={{
                 display: 'flex',
                 flexWrap: 'wrap',
@@ -88,9 +120,9 @@ export default function Pie(props: { data: GenshinResult<GroupData>, timelineDat
                 overflowX: 'hidden'//摆烂了
             }}
             >
-                <SinglePie data={props.data.character} />
-                <SinglePie data={props.data.weapon} />
-                <SinglePie data={props.data.standard} />
+                <SinglePie data={props.data.character} message={{gachaType:301,tableName:"character_wish"}} outData={outData} opened={opened} />
+                <SinglePie data={props.data.weapon} message={{gachaType:302,tableName:"weapon_wish"}} outData={outData} opened={opened} />
+                <SinglePie data={props.data.standard} message={{gachaType:200,tableName:"standard_wish"}} outData={outData} opened={opened} />
             </Box>
         </Box>
     );

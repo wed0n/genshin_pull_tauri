@@ -80,9 +80,9 @@ pub async fn get_wishes(window: Window, state: State<'_, GenshinState>) -> Resul
             statement.next().unwrap();
             statement.read::<i64, _>("id").unwrap()
         };
-        end_id_character = get_end_id("character_wish");
-        end_id_weapon = get_end_id("weapon_wish");
-        end_id_standard = get_end_id("standard_wish");
+        end_id_character = get_end_id(&CHARACTER_WISH.table_name);
+        end_id_weapon = get_end_id(&WEAPON_WISH.table_name);
+        end_id_standard = get_end_id(&STANDARD_WISH.table_name);
     }
     let tmp = state.raw_url.lock().await.clone();
     let string = String::from(&tmp);

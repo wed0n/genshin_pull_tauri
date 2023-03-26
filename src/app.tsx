@@ -2,7 +2,7 @@ import React from 'react';
 import { ThemeProvider, createTheme, Paper } from '@mui/material';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { invoke } from '@tauri-apps/api'
-import { GenshinCount, GenshinResult, GenshinStatistic, GroupData,GenshinTimeLine } from './interfaces'
+import { GenshinCount, GenshinResult, GenshinStatistic, GroupData, GenshinTimeLine } from './interfaces'
 import Dialog from './dialog'
 import SideBar from './sideBar';
 import Count from './count';
@@ -27,7 +27,7 @@ class App extends React.Component<{},
         groupData?: GenshinResult<GroupData>,
         countData?: GenshinResult<GenshinCount>,
         statisticData?: GenshinResult<Array<GenshinStatistic>>,
-        timeline?:GenshinTimeLine
+        timeline?: GenshinTimeLine
     }>{
     constructor(props: any) {
         super(props);
@@ -67,7 +67,7 @@ class App extends React.Component<{},
                     <SideBar uid={this.state.uid} />
                     <Routes>
                         <Route path="/" element={<Count genshinCounts={this.state.countData as GenshinResult<GenshinCount>} />} />
-                        <Route path="pie" element={<Pie data={this.state.groupData as GenshinResult<GroupData>} timelineData={this.state.timeline as GenshinTimeLine}/>} />
+                        <Route path="pie" element={<Pie data={this.state.groupData as GenshinResult<GroupData>} timelineData={this.state.timeline as GenshinTimeLine} />} />
                         <Route path="count" element={<Statistic genshinStatistics={this.state.statisticData as GenshinResult<Array<GenshinStatistic>>} />} />
                     </Routes>
                 </>;
@@ -79,7 +79,7 @@ class App extends React.Component<{},
             <BrowserRouter>
                 <ThemeProvider theme={theme}>
                     <Paper square elevation={0} sx={{ width: 1, height: 1, display: "flex" }}>
-                        <Dialog open={this.state.isError} errorMessage={this.state.errorMessage}></Dialog>
+                        <Dialog open={this.state.isError} errorMessage={this.state.errorMessage} />
                         {target}
                     </Paper>
                 </ThemeProvider>
