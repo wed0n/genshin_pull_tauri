@@ -7,7 +7,7 @@ import Dialog from './dialog'
 import SideBar from './sideBar';
 import Count from './count';
 import Statistic from "./statistic";
-import Pie from './pie';
+import Chart from './chart';
 import PrepareProgress from './prepareprogress';
 import { appWindow } from '@tauri-apps/api/window';
 
@@ -67,7 +67,7 @@ class App extends React.Component<{},
                     <SideBar uid={this.state.uid} />
                     <Routes>
                         <Route path="/" element={<Count genshinCounts={this.state.countData as GenshinResult<GenshinCount>} />} />
-                        <Route path="pie" element={<Pie data={this.state.groupData as GenshinResult<GroupData>} timelineData={this.state.timeline as GenshinTimeLine} />} />
+                        <Route path="pie" element={<Chart data={this.state.groupData as GenshinResult<GroupData>} timelineData={this.state.timeline as GenshinTimeLine} />} />
                         <Route path="count" element={<Statistic genshinStatistics={this.state.statisticData as GenshinResult<Array<GenshinStatistic>>} />} />
                     </Routes>
                 </>;

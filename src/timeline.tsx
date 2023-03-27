@@ -1,3 +1,4 @@
+import React, { createRef, Dispatch, MutableRefObject, SetStateAction, useEffect, useRef } from 'react';
 import ReactEChartsCore from 'echarts-for-react/lib/core';
 import * as echarts from 'echarts/core';
 import { TooltipComponent, TitleComponent, LegendComponent, GridComponent, DataZoomComponent, ToolboxComponent, MarkPointComponent } from 'echarts/components';
@@ -6,12 +7,13 @@ import { CanvasRenderer } from 'echarts/renderers';
 import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { EChartsOption } from 'echarts-for-react';
 import { TableVirtuoso } from 'react-virtuoso';
-import { GenshinPullsTableItem, GenshinTimeLine } from './interfaces';
-import React, { createRef, useEffect, useRef, useState } from 'react';
 import { invoke } from '@tauri-apps/api';
 import { ECharts } from 'echarts';
+import { GenshinPullsTableItem, GenshinTimeLine } from './interfaces';
+
 echarts.use([BarChart, TooltipComponent, TitleComponent, LegendComponent, CanvasRenderer, GridComponent, DataZoomComponent, ToolboxComponent, MarkPointComponent]);
-export default function TimeLine(props: { data: GenshinTimeLine, outData: React.MutableRefObject<GenshinPullsTableItem[]>, opened: React.MutableRefObject<boolean> }) {
+
+const TimeLine = React.memo(function TimeLine(props: { data: GenshinTimeLine, tableData: MutableRefObject<GenshinPullsTableItem[]>, setOpened: Dispatch<SetStateAction<boolean>> }) {
     let xAxis: string[] = [];
     let star5 = [];
     let star4 = [];
@@ -97,7 +99,6 @@ export default function TimeLine(props: { data: GenshinTimeLine, outData: React.
     useEffect(() => {
         let echart: ECharts = echartRef.current.getEchartsInstance();
         echart.getZr().on('click', function (params) {
-            console.log(params)
             const pointInPixel = [params.offsetX, params.offsetY];
             if (echart.containPixel('grid', pointInPixel)) {
                 let xIndex = echart.convertFromPixel({ seriesIndex: 0 }, [
@@ -110,8 +111,8 @@ export default function TimeLine(props: { data: GenshinTimeLine, outData: React.
                 let nextDay = date.toISOString().split("T")[0];
                 (async () => {
                     let result: GenshinPullsTableItem[] = await invoke("time_line_day_pulls", { startDay: day, endDay: nextDay });
-                    props.outData.current=result;
-                    props.opened.current=true;
+                    props.tableData.current = result;
+                    props.setOpened(true);
                 })();
             }
         });
@@ -121,8 +122,8 @@ export default function TimeLine(props: { data: GenshinTimeLine, outData: React.
             <ReactEChartsCore ref={echartRef} echarts={echarts} option={option} />
         </Box>
     );
-}
-
+});
+export default TimeLine;
 export function DayPullsTable(props: { data: GenshinPullsTableItem[] }) {
     const fixWdith = 200;
     return (
