@@ -41,7 +41,7 @@ export interface GenshinTimeLineItem {
     star4: number,
     star3: number
 }
-export interface GenshinPullsTableItem{
+export interface GenshinPullsTableItem {
     name: String,
     time: String,
     item_type: number,

@@ -1,4 +1,7 @@
-use crate::commands::{State, GenshinState, GenshinResult, Error, Serialize, CHARACTER_WISH, WEAPON_WISH, STANDARD_WISH, WishType, GenshinDayItem};
+use crate::commands::{
+    Error, GenshinResult, GenshinState, Serialize, State, WishType, CHARACTER_WISH, STANDARD_WISH,
+    WEAPON_WISH,
+};
 
 #[derive(Serialize)]
 pub struct GenshinPie {
@@ -11,10 +14,12 @@ pub struct GenshinPie {
 }
 
 #[tauri::command]
-pub async fn group_count(state: State<'_, GenshinState>) -> Result<GenshinResult<GenshinPie>, Error> {
+pub async fn group_count(
+    state: State<'_, GenshinState>,
+) -> Result<GenshinResult<GenshinPie>, Error> {
     let connection = state.db.lock().await;
     let connection = connection.as_ref().unwrap();
-    let closure = |wish_type: &WishType| -> Result<GenshinPie, Error>{
+    let closure = |wish_type: &WishType| -> Result<GenshinPie, Error> {
         let mut character5: i64 = 0;
         let mut weapon5: i64 = 0;
         let mut character4: i64 = 0;
@@ -26,10 +31,29 @@ pub async fn group_count(state: State<'_, GenshinState>) -> Result<GenshinResult
             let item_rank = statement.read::<i64, _>("rank")?;
             let count = statement.read::<i64, _>("count(id)")?;
             if item_type == 0 {
-                if item_rank == 5 { weapon5 = count; } else if item_rank == 4 { weapon4 = count; } else { weapon3 = count }
-            } else { if item_rank == 5 { character5 = count; } else { character4 = count; } }
+                if item_rank == 5 {
+                    weapon5 = count;
+                } else if item_rank == 4 {
+                    weapon4 = count;
+                } else {
+                    weapon3 = count
+                }
+            } else {
+                if item_rank == 5 {
+                    character5 = count;
+                } else {
+                    character4 = count;
+                }
+            }
         }
-        Ok(GenshinPie { name: wish_type.gacha_name.to_string(), character5, weapon5, character4, weapon4, weapon3 })
+        Ok(GenshinPie {
+            name: wish_type.gacha_name.to_string(),
+            character5,
+            weapon5,
+            character4,
+            weapon4,
+            weapon3,
+        })
     };
     Ok(GenshinResult {
         character: closure(&CHARACTER_WISH)?,
@@ -37,4 +61,3 @@ pub async fn group_count(state: State<'_, GenshinState>) -> Result<GenshinResult
         standard: closure(&STANDARD_WISH)?,
     })
 }
-

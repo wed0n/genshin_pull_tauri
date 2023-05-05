@@ -1,41 +1,42 @@
-use std::sync::Arc;
+mod count;
+mod group_count;
+mod request;
+mod statistic;
+mod table;
+mod timeline;
 
 use serde::{Deserialize, Serialize};
 use sqlite::Connection;
+use std::sync::Arc;
 use tauri::async_runtime::Mutex;
 use tauri::State;
 
 pub use count::*;
+pub use group_count::*;
 pub use request::*;
 pub use statistic::*;
-pub use group_count::*;
+pub use table::*;
 pub use timeline::*;
 
-mod request;
-mod statistic;
-mod count;
-mod group_count;
-mod timeline;
-
-struct WishType{
-    gacha_type:&'static str,
-    table_name:&'static str,
-    gacha_name:&'static str
+struct WishType {
+    gacha_type: &'static str,
+    table_name: &'static str,
+    gacha_name: &'static str,
 }
-static CHARACTER_WISH: WishType =WishType{
+static CHARACTER_WISH: WishType = WishType {
     gacha_type: "301",
     table_name: "character_wish",
-    gacha_name: "角色活动祈愿"
+    gacha_name: "角色活动祈愿",
 };
-static WEAPON_WISH: WishType=WishType{
+static WEAPON_WISH: WishType = WishType {
     gacha_type: "302",
     table_name: "weapon_wish",
-    gacha_name: "武器活动祈愿"
+    gacha_name: "武器活动祈愿",
 };
-static STANDARD_WISH: WishType=WishType{
+static STANDARD_WISH: WishType = WishType {
     gacha_type: "200",
     table_name: "standard_wish",
-    gacha_name: "常驻祈愿"
+    gacha_name: "常驻祈愿",
 };
 
 #[derive(Serialize)]
@@ -58,17 +59,18 @@ pub enum Error {
     #[error(transparent)]
     Network(#[from] reqwest::Error),
     #[error(transparent)]
-    Sql(#[from]sqlite::Error),
+    Sql(#[from] sqlite::Error),
     #[error(transparent)]
-    Tauri(#[from]tauri::Error),
+    Tauri(#[from] tauri::Error),
     #[error("{0}")]
-    Other(String)
+    Other(String),
 }
 
 // we must manually implement serde::Serialize
 impl serde::Serialize for Error {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: serde::ser::Serializer
+    where
+        S: serde::ser::Serializer,
     {
         serializer.serialize_str(self.to_string().as_ref())
     }
