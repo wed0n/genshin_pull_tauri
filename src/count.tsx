@@ -1,24 +1,48 @@
-import { Box, Paper, Typography, Table, TableBody, TableContainer, TableCell, TableHead, TableRow } from '@mui/material';
-import React from 'react';
+import {
+  Box,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material'
+import { Image } from 'mui-image'
+import React from 'react'
 import { GenshinCount, GenshinResult } from './interfaces'
 
-export default class Count extends React.Component<{ genshinCounts: GenshinResult<GenshinCount> }, {}>{
+export default class Count extends React.Component<
+  { genshinCounts: GenshinResult<GenshinCount> },
+  {}
+> {
   constructor(props: any) {
-    super(props);
+    super(props)
   }
   render() {
     return (
-      <Box sx={{
-        paddingTop: 1,
-        flexGrow: 1,
-        display: 'flex',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        overflowX: 'hidden'//摆烂了
-      }}>
-        <PullTable name='角色活动祈愿' genshinCount={this.props.genshinCounts.character} />
-        <PullTable name='武器活动祈愿' genshinCount={this.props.genshinCounts.weapon} />
-        <PullTable name='常驻祈愿' genshinCount={this.props.genshinCounts.standard} />
+      <Box
+        sx={{
+          paddingTop: 1,
+          flexGrow: 1,
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          overflowX: 'hidden', //摆烂了
+        }}>
+        <PullTable
+          name="角色活动祈愿"
+          genshinCount={this.props.genshinCounts.character}
+        />
+        <PullTable
+          name="武器活动祈愿"
+          genshinCount={this.props.genshinCounts.weapon}
+        />
+        <PullTable
+          name="常驻祈愿"
+          genshinCount={this.props.genshinCounts.standard}
+        />
       </Box>
     )
   }
@@ -26,8 +50,14 @@ export default class Count extends React.Component<{ genshinCounts: GenshinResul
 const PullTable = (props: any) => {
   return (
     <Paper sx={{ marginY: 2, marginX: 3 }} elevation={3}>
-      <Typography variant='h6' sx={{ marginTop: 1, marginLeft: 1 }}>{props.name}</Typography>
-      <Typography variant='subtitle2' sx={{ textAlign: 'end', paddingRight: 2 }}>当前已垫 <strong>{props.genshinCount.current}</strong> 抽</Typography>
+      <Typography variant="h6" sx={{ marginTop: 1, marginLeft: 1 }}>
+        {props.name}
+      </Typography>
+      <Typography
+        variant="subtitle2"
+        sx={{ textAlign: 'end', paddingRight: 2 }}>
+        当前已垫 <strong>{props.genshinCount.current}</strong> 抽
+      </Typography>
       <TableContainer sx={{ maxHeight: 372, minWidth: 400 }}>
         <Table stickyHeader>
           <TableHead>
@@ -40,9 +70,30 @@ const PullTable = (props: any) => {
           <TableBody>
             {props.genshinCount.items.map((row: GenshinCount) => (
               <TableRow
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                <TableCell component="th">{row.name}</TableCell>
+                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                <TableCell component="th">
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <Image
+                      className="avater"
+                      src={`https://wed0n-mihoyo-static.pages.dev/genshin/${row.name}.png`}
+                      wrapperStyle={{ marginRight: 6 }}
+                      duration={1200}
+                      style={{
+                        background: 'url(/genshin5Background.png)',
+                        borderRadius: '3px 3px 5px 3px',
+                        animation:
+                          '1200ms cubic-bezier(0.7, 0, 0.6, 1) 0s 1 normal none running materialize',
+                      }}
+                      width={38}
+                    />
+                    <div>{row.name}</div>
+                  </Box>
+                </TableCell>
                 <TableCell align="center">{row.count}</TableCell>
                 <TableCell align="center">{row.time}</TableCell>
               </TableRow>
