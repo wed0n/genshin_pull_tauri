@@ -24,7 +24,6 @@ import {
 } from 'echarts/components'
 import * as echarts from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
-import { Image } from 'mui-image'
 import React, {
   Dispatch,
   MutableRefObject,
@@ -34,6 +33,7 @@ import React, {
   useRef,
 } from 'react'
 import { TableVirtuoso } from 'react-virtuoso'
+import GenshinImage from './component/GenshinImage'
 import { GenshinPullsTableItem, GenshinTimeLine } from './interfaces'
 
 echarts.use([
@@ -218,27 +218,7 @@ export function DayPullsTable(props: { data: GenshinPullsTableItem[] }) {
         return (
           <>
             <TableCell width={fixWdith} height={71} sx={style}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Image
-                  className="test"
-                  src={`https://wed0n-mihoyo-static.pages.dev/genshin/${item.name}.png`}
-                  wrapperStyle={{ marginRight: 6 }}
-                  duration={1200}
-                  style={{
-                    backgroundImage: `url(/genshin${item.rank}Background.png)`,
-                    borderRadius: '3px 3px 5px 3px',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center top',
-                  }}
-                  width={38}
-                />
-                <div>{item.name}</div>
-              </Box>
+              <GenshinImage name={item.name} rank={item.rank} />
             </TableCell>
             <TableCell align="center" sx={style}>
               {item_type}

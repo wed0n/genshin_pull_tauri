@@ -42,8 +42,8 @@ export interface GenshinTimeLineItem {
   star3: number
 }
 export interface GenshinPullsTableItem {
-  name: String
-  time: String
+  name: string
+  time: string
   item_type: number
   rank: number
   gacha_type: number

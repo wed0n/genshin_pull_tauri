@@ -9,8 +9,8 @@ import {
   TableRow,
   Typography,
 } from '@mui/material'
-import { Image } from 'mui-image'
 import React from 'react'
+import GenshinImage from './component/GenshinImage'
 import { GenshinCount, GenshinResult } from './interfaces'
 
 export default class Count extends React.Component<
@@ -72,27 +72,7 @@ const PullTable = (props: any) => {
               <TableRow
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                 <TableCell component="th">
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      justyContent: 'center',
-                      alignItems: 'center',
-                    }}>
-                    <Image
-                      className="avater"
-                      src={`https://wed0n-mihoyo-static.pages.dev/genshin/${row.name}.png`}
-                      wrapperStyle={{ marginRight: 6 }}
-                      duration={1200}
-                      style={{
-                        background: 'url(/genshin5Background.png)',
-                        borderRadius: '3px 3px 5px 3px',
-                        animation:
-                          '1200ms cubic-bezier(0.7, 0, 0.6, 1) 0s 1 normal none running materialize',
-                      }}
-                      width={38}
-                    />
-                    <div>{row.name}</div>
-                  </Box>
+                  <GenshinImage name={row.name} rank={5} />
                 </TableCell>
                 <TableCell align="center">{row.count}</TableCell>
                 <TableCell align="center">{row.time}</TableCell>
