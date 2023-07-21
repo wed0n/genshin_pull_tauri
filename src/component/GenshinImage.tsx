@@ -22,7 +22,7 @@ export default function GenshinImage({
         alignItems: 'center',
       }}>
       <Image
-        src={`https://wed0n-mihoyo-static.pages.dev/genshin/${name}.webp`}
+        src={`https://mihoyo-static.wed0n.cf/genshin/${name}.webp`}
         wrapperStyle={{ marginRight: 6 }}
         duration={1200}
         style={{

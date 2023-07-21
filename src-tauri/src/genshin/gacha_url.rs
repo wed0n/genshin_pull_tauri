@@ -1,11 +1,14 @@
 extern crate chrono;
 extern crate serde;
 
-use crate::disk_cache::{BlockFile, CacheAddr, EntryStore, IndexFile};
-use chrono::{DateTime, Duration, Local, NaiveDateTime, SecondsFormat, Utc};
-use serde::Serialize;
+use std::fs::read_dir;
 use std::io::Result;
 use std::path::Path;
+
+use chrono::{DateTime, Duration, Local, NaiveDateTime, SecondsFormat, Utc};
+use serde::Serialize;
+
+use crate::disk_cache::{BlockFile, CacheAddr, EntryStore, IndexFile};
 
 pub const GACHA_URL_ENDPOINT: &str = "/event/gacha_info/api/getGachaLog?";
 
@@ -43,8 +46,59 @@ impl From<GachaUrl> for SerializedGachaUrl {
 }
 
 pub fn find_gacha_urls(genshin_data_dir: &Path) -> Result<Vec<GachaUrl>> {
+    let mut versions: [u8; 4] = [0, 0, 0, 0];
+    let mut tmp_versions: [u8; 4] = [0, 0, 0, 0];
+    let mut i = 0;
+    let web_caches_dir = genshin_data_dir.join("webCaches/");
+    for entry in read_dir(&web_caches_dir)? {
+        let entry = entry?;
+        let entry_path = entry.path();
+        if !entry_path.is_dir() {
+            continue;
+        }
+        let entry_name = entry_path.file_name().unwrap().to_string_lossy();
+        let mut nums = entry_name.split(".");
+
+        i = 0;
+        while i < 4 {
+            let tmp = nums.next();
+            match tmp {
+                Some(value) => {
+                    let tmp = value.parse::<u8>();
+                    match tmp {
+                        Ok(value) => {
+                            tmp_versions[i] = value;
+                        }
+                        Err(_) => {
+                            break;
+                        }
+                    }
+                }
+                None => {
+                    break;
+                }
+            }
+            i += 1;
+        }
+
+        //If new version is greater than old one, then replace.
+        i = 0;
+        while i < 4 {
+            if versions[i] < tmp_versions[i] {
+                break;
+            }
+            i += 1;
+        }
+        if i < 4 {
+            versions = tmp_versions
+        }
+    }
+    let result = format!(
+        "{}.{}.{}.{}",
+        versions[0], versions[1], versions[2], versions[3]
+    );
     // Join the path to the web cache data directory
-    let cache_dir = genshin_data_dir.join("webCaches/2.13.0.1/Cache/Cache_Data");
+    let cache_dir = web_caches_dir.join(result + "/Cache/Cache_Data");
 
     // Read index file and data_1, data_2 block files
     let index_file = IndexFile::from_file(cache_dir.join("index"))?;

@@ -99,49 +99,6 @@ class App extends React.Component<
       filter: saturate(100%) contrast(100%) brightness(100%);
     }
   }`
-    let target
-    if (this.state.uid != undefined && this.state.isPrepared == true) {
-      target = (
-        <>
-          <SideBar uid={this.state.uid} />
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <Count
-                  genshinCounts={
-                    this.state.countData as GenshinResult<GenshinCount>
-                  }
-                />
-              }
-            />
-            <Route
-              path="pie"
-              element={
-                <Chart
-                  data={this.state.groupData as GenshinResult<GroupData>}
-                  timelineData={this.state.timeline as GenshinTimeLine}
-                />
-              }
-            />
-            <Route
-              path="count"
-              element={
-                <Statistic
-                  genshinStatistics={
-                    this.state.statisticData as GenshinResult<
-                      Array<GenshinStatistic>
-                    >
-                  }
-                />
-              }
-            />
-          </Routes>
-        </>
-      )
-    } else {
-      target = <PrepareProgress message={this.state.wishMessage} />
-    }
     return (
       <BrowserRouter>
         <ThemeProvider theme={theme}>
@@ -154,7 +111,46 @@ class App extends React.Component<
               errorMessage={this.state.errorMessage}
             />
             <style>{overRidedKeyFrame}</style>
-            {target}
+            {this.state.uid != undefined && this.state.isPrepared == true ? (
+              <>
+                <SideBar uid={this.state.uid} />
+                <Routes>
+                  <Route
+                    path="/"
+                    element={
+                      <Count
+                        genshinCounts={
+                          this.state.countData as GenshinResult<GenshinCount>
+                        }
+                      />
+                    }
+                  />
+                  <Route
+                    path="pie"
+                    element={
+                      <Chart
+                        data={this.state.groupData as GenshinResult<GroupData>}
+                        timelineData={this.state.timeline as GenshinTimeLine}
+                      />
+                    }
+                  />
+                  <Route
+                    path="count"
+                    element={
+                      <Statistic
+                        genshinStatistics={
+                          this.state.statisticData as GenshinResult<
+                            Array<GenshinStatistic>
+                          >
+                        }
+                      />
+                    }
+                  />
+                </Routes>
+              </>
+            ) : (
+              <PrepareProgress message={this.state.wishMessage} />
+            )}
           </Paper>
         </ThemeProvider>
       </BrowserRouter>
