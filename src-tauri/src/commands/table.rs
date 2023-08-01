@@ -1,13 +1,6 @@
 use crate::commands::{Error, GenshinState, Serialize, State};
 
-#[derive(Serialize)]
-pub struct GenshinTableItem {
-    name: String,
-    time: String,
-    item_type: i64,
-    rank: i64,
-    gacha_type: i64,
-}
+use super::GenshinTableItem;
 
 #[tauri::command]
 pub async fn time_line_day_pulls(

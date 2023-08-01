@@ -1,3 +1,29 @@
 #dialogTable {
   height: calc(100vh - 64px);
 }
+.CloudItem {
+  z-index: 1;
+  width: 100px;
+  height: 100px;
+  transition: all 0.5s ease;
+  position: absolute;
+  overflow: hidden;
+  border-radius: 18%;
+  background-size: cover;
+  background-position: center top;
+}
+.CloudItem:hover {
+  cursor: pointer;
+  transform: scale(1);
+  z-index: 10;
+}
+.CloudItemCount {
+  position: absolute;
+  bottom: 2%;
+  right: 5%;
+  text-align: center;
+  font-weight: 400;
+  font-size: 20px;
+  border-radius: 10px;
+  background: #ffffffb3;
+}

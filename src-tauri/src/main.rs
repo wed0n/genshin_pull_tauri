@@ -8,8 +8,8 @@ mod disk_cache;
 mod genshin;
 
 use commands::{
-    count_wishes, get_pulls_by_group, get_wishes, group_count, prepare, statistic_wishes,
-    time_line, time_line_day_pulls, GenshinState,
+    count_wishes, get_pulls_by_group, get_wishes, group_count, item_wishes, prepare, time_line,
+    time_line_day_pulls, type_wishes, GenshinState,
 };
 
 fn main() {
@@ -22,7 +22,8 @@ fn main() {
             prepare,
             get_wishes,
             count_wishes,
-            statistic_wishes,
+            type_wishes,
+            item_wishes,
             group_count,
             time_line,
             time_line_day_pulls,

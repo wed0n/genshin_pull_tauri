@@ -51,6 +51,15 @@ pub struct GenshinState {
     pub raw_url: Mutex<String>,
 }
 
+#[derive(Serialize)]
+pub struct GenshinTableItem {
+    name: String,
+    time: String,
+    item_type: i64,
+    rank: i64,
+    gacha_type: i64,
+}
+
 // create the error type that represents all errors possible in our program
 #[derive(Debug, thiserror::Error)]
 pub enum Error {

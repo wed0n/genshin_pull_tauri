@@ -13,6 +13,7 @@ export interface GroupData {
 }
 export interface GenshinStatistic {
   name: string
+  rank: number
   count: number
 }
 export interface GenshinCount {
@@ -47,4 +48,16 @@ export interface GenshinPullsTableItem {
   item_type: number
   rank: number
   gacha_type: number
+}
+
+export interface GenshinCloudData {
+  name: string
+  rank: number
+  count: number
+  scale: number
+  x: number
+  y: number
+  rx: number
+  ry: number
+  size: number
 }

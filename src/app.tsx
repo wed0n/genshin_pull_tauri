@@ -9,7 +9,6 @@ import Dialog from './dialog'
 import {
   GenshinCount,
   GenshinResult,
-  GenshinStatistic,
   GenshinTimeLine,
   GroupData,
 } from './interfaces'
@@ -33,7 +32,6 @@ class App extends React.Component<
     errorMessage: String
     groupData?: GenshinResult<GroupData>
     countData?: GenshinResult<GenshinCount>
-    statisticData?: GenshinResult<Array<GenshinStatistic>>
     timeline?: GenshinTimeLine
   }
 > {
@@ -63,16 +61,12 @@ class App extends React.Component<
       let count_result = (await invoke(
         'count_wishes'
       )) as GenshinResult<GenshinCount>
-      let statistic_result = (await invoke(
-        'statistic_wishes'
-      )) as GenshinResult<Array<GenshinStatistic>>
       let timeline_result = (await invoke('time_line')) as GenshinTimeLine
       this.setState({
         ...this.state,
         isPrepared: true,
         groupData: group_count_data,
         countData: count_result,
-        statisticData: statistic_result,
         timeline: timeline_result,
       })
     } catch (error) {
@@ -134,18 +128,7 @@ class App extends React.Component<
                       />
                     }
                   />
-                  <Route
-                    path="count"
-                    element={
-                      <Statistic
-                        genshinStatistics={
-                          this.state.statisticData as GenshinResult<
-                            Array<GenshinStatistic>
-                          >
-                        }
-                      />
-                    }
-                  />
+                  <Route path="count" element={<Statistic />} />
                 </Routes>
               </>
             ) : (

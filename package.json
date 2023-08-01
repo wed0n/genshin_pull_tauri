@@ -23,7 +23,8 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.6.1",
     "react-virtuoso": "^4.1.0",
-    "sass": "^1.57.1"
+    "sass": "^1.57.1",
+    "vite-tsconfig-paths": "^4.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.26",

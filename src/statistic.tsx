@@ -1,78 +1,44 @@
-import {
-  Box,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from '@mui/material'
-import React from 'react'
-import { GenshinResult, GenshinStatistic } from './interfaces'
+import { Box, Dialog, DialogContent } from '@mui/material'
+import { invoke } from '@tauri-apps/api'
+import CharacterCloud from 'component/GenshinCloud/CharacterCloud'
+import WeaponCloud from 'component/GenshinCloud/WeaponCloud'
+import { GenshinPullsTableItem } from 'interfaces'
+import { useRef, useState } from 'react'
+import { DayPullsTable } from 'timeline'
 
-class Statistic extends React.Component<
-  { genshinStatistics: GenshinResult<Array<GenshinStatistic>> },
-  {}
-> {
-  constructor(props: any) {
-    super(props)
+export default function Statistic() {
+  const [opened, setOpened] = useState(false)
+  const tableData = useRef([] as GenshinPullsTableItem[])
+  const openTable = async (name: string) => {
+    const result: GenshinPullsTableItem[] = await invoke('item_wishes', {
+      name,
+    })
+    tableData.current = result
+    setOpened(true)
   }
-  render() {
-    return (
-      <Box
-        sx={{
-          paddingTop: 1,
-          flexGrow: 1,
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          overflowX: 'hidden', //摆烂了
-        }}>
-        <PullTable
-          name="角色活动祈愿"
-          genshinCount={this.props.genshinStatistics.character}
-        />
-        <PullTable
-          name="武器活动祈愿"
-          genshinCount={this.props.genshinStatistics.weapon}
-        />
-        <PullTable
-          name="常驻祈愿"
-          genshinCount={this.props.genshinStatistics.standard}
-        />
-      </Box>
-    )
-  }
-}
-const PullTable = (props: any) => {
   return (
-    <Paper sx={{ marginY: 2, marginX: 3 }} elevation={3}>
-      <Typography variant="h6" sx={{ marginTop: 1, marginLeft: 1 }}>
-        {props.name}
-      </Typography>
-      <TableContainer sx={{ maxHeight: 372, minWidth: 400 }}>
-        <Table stickyHeader aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>名称</TableCell>
-              <TableCell align="center">数量</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {props.genshinCount.map((row: GenshinStatistic) => (
-              <TableRow
-                key={row.name}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                <TableCell component="th">{row.name}</TableCell>
-                <TableCell align="center">{row.count}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Paper>
+    <Box
+      style={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        overflowX: 'hidden',
+        flexDirection: 'column',
+      }}>
+      <Dialog
+        fullWidth={true}
+        maxWidth="md"
+        open={opened}
+        onClose={() => {
+          setOpened(false)
+        }}>
+        <DialogContent id="dialogTable">
+          <DayPullsTable data={tableData.current} />
+        </DialogContent>
+      </Dialog>
+      <CharacterCloud openTable={openTable} />
+      <WeaponCloud openTable={openTable} />
+    </Box>
   )
 }
-export default Statistic
