@@ -166,6 +166,7 @@ fn write_database(
     items: Vec<GenshinItem>,
     table_name: &str,
 ) -> Result<(), Error> {
+    connection.execute("BEGIN TRANSACTION;")?;
     for item in items.iter().rev() {
         let mut statement = connection.prepare(format!(
             "select item_id,name from item_list where name='{}';",
@@ -194,5 +195,6 @@ fn write_database(
             table_name, item_id, &item.time, &item.id
         ))?;
     }
+    connection.execute("END TRANSACTION;")?;
     Ok(())
 }
