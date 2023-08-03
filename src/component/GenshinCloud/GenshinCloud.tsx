@@ -85,7 +85,7 @@ export default function GenshinCloud(props: {
       sx={{
         width: props.width,
         height: props.height,
-        overflowX: 'hidden',
+        overflow: 'visable',
         position: 'relative',
       }}>
       {data.map((value) => (

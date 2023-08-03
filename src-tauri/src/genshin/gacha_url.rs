@@ -47,10 +47,9 @@ impl From<GachaUrl> for SerializedGachaUrl {
 
 pub fn find_gacha_urls(genshin_data_dir: &Path) -> Result<Vec<GachaUrl>> {
     let mut versions: [u8; 4] = [0, 0, 0, 0];
-    let mut tmp_versions: [u8; 4] = [0, 0, 0, 0];
     let mut i = 0;
     let web_caches_dir = genshin_data_dir.join("webCaches/");
-    for entry in read_dir(&web_caches_dir)? {
+    'outer: for entry in read_dir(&web_caches_dir)? {
         let entry = entry?;
         let entry_path = entry.path();
         if !entry_path.is_dir() {
@@ -67,7 +66,32 @@ pub fn find_gacha_urls(genshin_data_dir: &Path) -> Result<Vec<GachaUrl>> {
                     let tmp = value.parse::<u8>();
                     match tmp {
                         Ok(value) => {
-                            tmp_versions[i] = value;
+                            if value >= versions[i] {
+                                versions[i] = value;
+                                i += 1;
+                                break;
+                            } else {
+                                continue 'outer;
+                            }
+                        }
+                        Err(_) => {
+                            break;
+                        }
+                    }
+                }
+                None => {
+                    break;
+                }
+            }
+        }
+        while i < 4 {
+            let tmp = nums.next();
+            match tmp {
+                Some(value) => {
+                    let tmp = value.parse::<u8>();
+                    match tmp {
+                        Ok(value) => {
+                            versions[i] = value;
                         }
                         Err(_) => {
                             break;
@@ -79,18 +103,6 @@ pub fn find_gacha_urls(genshin_data_dir: &Path) -> Result<Vec<GachaUrl>> {
                 }
             }
             i += 1;
-        }
-
-        //If new version is greater than old one, then replace.
-        i = 0;
-        while i < 4 {
-            if versions[i] < tmp_versions[i] {
-                break;
-            }
-            i += 1;
-        }
-        if i < 4 {
-            versions = tmp_versions
         }
     }
     let result = format!(

@@ -49,7 +49,7 @@ export default class Count extends React.Component<
 }
 const PullTable = (props: any) => {
   return (
-    <Paper sx={{ marginY: 2, marginX: 3 }} elevation={3}>
+    <Paper sx={{ marginY: 2, marginX: 3, height: 435 }} elevation={3}>
       <Typography variant="h6" sx={{ marginTop: 1, marginLeft: 1 }}>
         {props.name}
       </Typography>
