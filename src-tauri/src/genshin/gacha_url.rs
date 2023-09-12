@@ -27,6 +27,7 @@ pub struct SerializedGachaUrl {
 }
 
 impl GachaUrl {
+    #[allow(dead_code)]
     pub fn is_expired(&self, current_time: &DateTime<Local>) -> bool {
         let expired_time = (self.creation_time + Duration::days(1)).with_timezone(&Local);
         *current_time >= expired_time
@@ -46,8 +47,8 @@ impl From<GachaUrl> for SerializedGachaUrl {
 }
 
 pub fn find_gacha_urls(genshin_data_dir: &Path) -> Result<Vec<GachaUrl>> {
-    let mut versions: [u8; 4] = [0, 0, 0, 0];
-    let mut i = 0;
+    let mut versions: [u32; 4] = [0, 0, 0, 0];
+    let mut i: usize;
     let web_caches_dir = genshin_data_dir.join("webCaches/");
     'outer: for entry in read_dir(&web_caches_dir)? {
         let entry = entry?;
@@ -63,7 +64,7 @@ pub fn find_gacha_urls(genshin_data_dir: &Path) -> Result<Vec<GachaUrl>> {
             let tmp = nums.next();
             match tmp {
                 Some(value) => {
-                    let tmp = value.parse::<u8>();
+                    let tmp = value.parse::<u32>();
                     match tmp {
                         Ok(value) => {
                             if value >= versions[i] {
@@ -88,7 +89,7 @@ pub fn find_gacha_urls(genshin_data_dir: &Path) -> Result<Vec<GachaUrl>> {
             let tmp = nums.next();
             match tmp {
                 Some(value) => {
-                    let tmp = value.parse::<u8>();
+                    let tmp = value.parse::<u32>();
                     match tmp {
                         Ok(value) => {
                             versions[i] = value;

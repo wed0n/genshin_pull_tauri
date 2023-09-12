@@ -9,29 +9,29 @@ use tokio::time::{sleep, Duration};
 
 #[derive(Deserialize)]
 struct GenshinResponse<T> {
-    retcode: i8,
-    message: String,
+    // retcode: i8,
+    // message: String,
     data: T,
 }
 
 #[derive(Deserialize)]
 struct GenshinData {
-    page: String,
-    size: String,
-    total: String,
+    // page: String,
+    // size: String,
+    // total: String,
     list: Vec<GenshinItem>,
-    region: String,
+    // region: String,
 }
 
 #[derive(Deserialize)]
 struct GenshinItem {
     uid: String,
-    gacha_type: String,
-    item_id: String,
-    count: String,
+    // gacha_type: String,
+    // item_id: String,
+    // count: String,
     time: String,
     name: String,
-    lang: String,
+    // lang: String,
     item_type: String,
     rank_type: String,
     id: String,
@@ -96,20 +96,19 @@ pub async fn get_wishes(window: Window, state: State<'_, GenshinState>) -> Resul
         end_id_weapon = get_end_id(&WEAPON_WISH.table_name);
         end_id_standard = get_end_id(&STANDARD_WISH.table_name);
     }
-    let tmp = state.raw_url.lock().await.clone();
-    let string = String::from(&tmp);
-    let strl = Arc::new(string);
-    let strlc1 = Arc::clone(&strl);
-    let strlc2 = Arc::clone(&strl);
-    let dbl1 = Arc::clone(&state.db);
-    let dbl2 = Arc::clone(&state.db);
-    let dbl3 = Arc::clone(&state.db);
-    let window1 = Arc::new(window);
-    let window2 = Arc::clone(&window1);
-    let window3 = Arc::clone(&window1);
-    get_wish(dbl1, strl, window1, &CHARACTER_WISH, end_id_character).await?;
-    get_wish(dbl2, strlc1, window2, &WEAPON_WISH, end_id_weapon).await?;
-    get_wish(dbl3, strlc2, window3, &STANDARD_WISH, end_id_standard).await?;
+    let string = state.raw_url.lock().await.clone();
+    let str = Arc::new(string);
+    let window = Arc::new(window);
+    for item in [
+        (&CHARACTER_WISH, end_id_character),
+        (&WEAPON_WISH, end_id_weapon),
+        (&STANDARD_WISH, end_id_standard),
+    ] {
+        let db = Arc::clone(&state.db);
+        let window = Arc::clone(&window);
+        let strlc = Arc::clone(&str);
+        get_wish(db, strlc, window, item.0, item.1).await?;
+    }
     Ok(())
 }
 

@@ -1,4 +1,4 @@
-use crate::commands::{Error, GenshinResult, GenshinState, Serialize, State};
+use crate::commands::{Error, GenshinState, Serialize, State};
 
 use super::GenshinTableItem;
 

@@ -6,9 +6,9 @@ use std::fs::File;
 use std::io::{BufReader, Error, ErrorKind, Read, Result};
 use std::path::Path;
 
-const BLOCK_MAGIC: u32 = 0xC104CAC3;
-const BLOCK_VERSION2_0: u32 = 0x20000;
-const BLOCK_VERSION3_0: u32 = 0x30000;
+// const BLOCK_MAGIC: u32 = 0xC104CAC3;
+// const BLOCK_VERSION2_0: u32 = 0x20000;
+// const BLOCK_VERSION3_0: u32 = 0x30000;
 const BLOCK_HEADER_SIZE: u32 = 8192;
 const BLOCK_MAX_BLOCKS: u32 = (BLOCK_HEADER_SIZE - 80) * 8;
 

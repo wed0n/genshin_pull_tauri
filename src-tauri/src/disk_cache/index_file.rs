@@ -6,11 +6,11 @@ use std::fs::File;
 use std::io::{BufReader, Read, Result};
 use std::path::Path;
 
-const INDEX_MAGIC: u32 = 0xC103CAC3;
-const INDEX_VERSION2_0: u32 = 0x20000;
-const INDEX_VERSION2_1: u32 = 0x20001;
-const INDEX_VERSION3_0: u32 = 0x30000;
-const INDEX_TABLE_SIZE: u32 = 0x10000;
+// const INDEX_MAGIC: u32 = 0xC103CAC3;
+// const INDEX_VERSION2_0: u32 = 0x20000;
+// const INDEX_VERSION2_1: u32 = 0x20001;
+// const INDEX_VERSION3_0: u32 = 0x30000;
+// const INDEX_TABLE_SIZE: u32 = 0x10000;
 
 pub struct LruData {
     pub pad1: [i32; 2],
