@@ -55,10 +55,10 @@
     },
     "windows": [
       {
-        "minHeight": 648,
-        "minWidth": 1152,
-        "height": 648,
-        "width": 1152,
+        "minHeight": 672,
+        "minWidth": 1168,
+        "height": 672,
+        "width": 1168,
         "center": true,
         "fullscreen": false,
         "resizable": true,
