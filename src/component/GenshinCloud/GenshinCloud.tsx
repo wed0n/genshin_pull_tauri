@@ -89,7 +89,7 @@ export default function GenshinCloud(props: {
         position: 'relative',
       }}>
       {data.map((value) => (
-        <CloudItem data={value} openTable={props.openTable} />
+        <CloudItem key={value.name} data={value} openTable={props.openTable} />
       ))}
     </Box>
   )
