@@ -12,6 +12,7 @@
   <img src="./docs/1.png" style="margin: 35px 0;width: 80%;"/>
   <img src="./docs/2.png" style="margin: 35px 0;width: 80%;"/>
   <img src="./docs/3.png" style="margin: 35px 0;width: 80%;"/>
+  <img src="./docs/4.png" style="margin: 35px 0;width: 80%;"/>
 </div>
 
 
