@@ -10,7 +10,7 @@ use serde::Serialize;
 
 use crate::disk_cache::{BlockFile, CacheAddr, EntryStore, IndexFile};
 
-pub const GACHA_URL_ENDPOINT: &str = "/event/gacha_info/api/getGachaLog?";
+pub const GACHA_URL_ENDPOINT: &str = "/api/getGachaLog?";
 
 #[derive(Debug, Clone)]
 pub struct GachaUrl {
@@ -128,6 +128,12 @@ pub fn find_gacha_urls(genshin_data_dir: &Path) -> Result<Vec<GachaUrl>> {
         // Gacha url must be a long key and stored in the data_2 block file,
         // So the long key of entry must not be zero.
         if !entry.is_long_url() {
+            continue;
+        }
+
+        // Maybe the long key points to data_3 or something else
+        // SEE: https://github.com/lgou2w/HoYo.Gacha/issues/15
+        if entry.long_key.file_number() != block_file2.header.this_file as u32 {
             continue;
         }
 

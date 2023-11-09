@@ -70,7 +70,7 @@ class App extends React.Component<
         timeline: timeline_result,
       })
     } catch (error) {
-      console.log(error)
+      console.error(error)
       this.setState({
         ...this.state,
         isError: true,
