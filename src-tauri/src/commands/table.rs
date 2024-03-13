@@ -17,7 +17,7 @@ pub async fn time_line_day_pulls(
             format!("SELECT name,time,type,rank,{} gacha_type,id FROM item_list,{} where item_list.item_id={}.item_id",wish_type.gacha_type,wish_type.table_name,wish_type.table_name)
         },
         &format!(
-            "where time>'{}' and time<'{}' order by id desc;",
+            ") where time>'{}' and time<'{}' order by id desc;",
             start_day, end_day
         ),
     );
