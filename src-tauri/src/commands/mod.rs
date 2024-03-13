@@ -103,7 +103,7 @@ pub fn make_genshin_result<T>(
     Ok(GenshinResult {
         character: closure(&CHARACTER_WISH)?,
         weapon: closure(&WEAPON_WISH)?,
-        chronicle: closure(&CHARACTER_WISH)?,
+        chronicle: closure(&CHRONICLE_WISH)?,
         standard: closure(&STANDARD_WISH)?,
     })
 }

@@ -40,6 +40,10 @@ export default class Count extends React.Component<
           genshinCount={this.props.genshinCounts.weapon}
         />
         <PullTable
+          name="集录祈愿"
+          genshinCount={this.props.genshinCounts.chronicle}
+        />
+        <PullTable
           name="常驻祈愿"
           genshinCount={this.props.genshinCounts.standard}
         />

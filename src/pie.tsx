@@ -137,6 +137,12 @@ const Pie = React.memo(function Pie(props: {
         setOpened={props.setOpened}
       />
       <SinglePie
+        data={props.data.chronicle}
+        message={{ gachaType: 200, tableName: 'chronicled_wish' }}
+        outData={props.tableData}
+        setOpened={props.setOpened}
+      />
+      <SinglePie
         data={props.data.standard}
         message={{ gachaType: 200, tableName: 'standard_wish' }}
         outData={props.tableData}

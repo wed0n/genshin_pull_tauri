@@ -1,6 +1,7 @@
 export interface GenshinResult<T> {
   character: T
   weapon: T
+  chronicle: T
   standard: T
 }
 export interface GroupData {

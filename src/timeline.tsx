@@ -204,6 +204,9 @@ export function DayPullsTable(props: { data: GenshinPullsTableItem[] }) {
           case 302:
             gacha_type = '武器活动祈愿'
             break
+          case 500:
+            gacha_type = '集录祈愿'
+            break
           default:
             gacha_type = '常驻祈愿'
         }
