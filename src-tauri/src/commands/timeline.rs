@@ -2,6 +2,8 @@ use crate::commands::{Error, GenshinState, Serialize, State};
 use time::macros::format_description;
 use time::Date;
 
+use super::{make_union_sql, WishType};
+
 #[derive(Serialize)]
 pub struct GenshinTimeline {
     total: i64,
@@ -23,7 +25,18 @@ pub async fn time_line(state: State<'_, GenshinState>) -> Result<GenshinTimeline
     let formatter = format_description!("[year]-[month]-[day]");
     let connection = state.db.lock().await;
     let connection = connection.as_ref().unwrap();
-    let mut statement = connection.prepare("select * from (SELECT time,rank,id FROM item_list,character_wish where item_list.item_id=character_wish.item_id union all SELECT time,rank,id FROM item_list,weapon_wish where item_list.item_id=weapon_wish.item_id union all SELECT time,rank,id FROM item_list,standard_wish where item_list.item_id=standard_wish.item_id) order by id;")?;
+
+    let sql = make_union_sql(
+        "select * from ( ",
+        &|wish_type: &WishType| {
+            format!(
+                "SELECT time,rank,id FROM item_list,{} where item_list.item_id={}.item_id",
+                wish_type.table_name, wish_type.table_name
+            )
+        },
+        " ) order by id;",
+    );
+    let mut statement = connection.prepare(sql)?;
     let mut items: Vec<GenshinTimeLineItem> = vec![];
     match statement.next()? {
         sqlite::State::Row => {

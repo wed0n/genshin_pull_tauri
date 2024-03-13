@@ -18,7 +18,7 @@ pub use statistic::*;
 pub use table::*;
 pub use timeline::*;
 
-struct WishType {
+pub struct WishType {
     gacha_type: &'static str,
     table_name: &'static str,
     gacha_name: &'static str,
@@ -33,16 +33,28 @@ static WEAPON_WISH: WishType = WishType {
     table_name: "weapon_wish",
     gacha_name: "武器活动祈愿",
 };
+static CHRONICLE_WISH: WishType = WishType {
+    gacha_type: "500",
+    table_name: "chronicled_wish",
+    gacha_name: "集录祈愿",
+};
 static STANDARD_WISH: WishType = WishType {
     gacha_type: "200",
     table_name: "standard_wish",
     gacha_name: "常驻祈愿",
 };
+static WISHES: [&WishType; 4] = [
+    &CHARACTER_WISH,
+    &WEAPON_WISH,
+    &CHRONICLE_WISH,
+    &STANDARD_WISH,
+];
 
 #[derive(Serialize)]
 pub struct GenshinResult<T> {
     character: T,
     weapon: T,
+    chronicle: T,
     standard: T,
 }
 
@@ -83,4 +95,26 @@ impl serde::Serialize for Error {
     {
         serializer.serialize_str(self.to_string().as_ref())
     }
+}
+
+pub fn make_genshin_result<T>(
+    closure: &dyn Fn(&WishType) -> Result<T, Error>,
+) -> Result<GenshinResult<T>, Error> {
+    Ok(GenshinResult {
+        character: closure(&CHARACTER_WISH)?,
+        weapon: closure(&WEAPON_WISH)?,
+        chronicle: closure(&CHARACTER_WISH)?,
+        standard: closure(&STANDARD_WISH)?,
+    })
+}
+
+pub fn make_union_sql(begin: &str, closure: &dyn Fn(&WishType) -> String, end: &str) -> String {
+    let mut sql = String::from(begin);
+    sql.push_str(&closure(WISHES[0]));
+    for item in &WISHES[1..] {
+        sql.push_str(" union all ");
+        sql.push_str(&closure(&item));
+    }
+    sql.push_str(end);
+    sql
 }

@@ -1,11 +1,12 @@
 use crate::commands::{
     Arc, Connection, Deserialize, Error, Error::Other, GenshinState, Mutex, State, WishType,
-    CHARACTER_WISH, STANDARD_WISH, WEAPON_WISH,
 };
 use crate::genshin::{find_game_data_dir, find_recent_gacha_url};
 use regex::Regex;
 use tauri::Window;
 use tokio::time::{sleep, Duration};
+
+use super::WISHES;
 
 #[derive(Deserialize)]
 struct GenshinResponse<T> {
@@ -71,7 +72,11 @@ pub async fn prepare(state: State<'_, GenshinState>) -> Result<String, Error> {
     path.pop();
     path.push(uid.clone());
     let db = sqlite::open(path)?;
-    db.execute("PRAGMA foreign_keys=ON;CREATE TABLE IF NOT EXISTS item_list (item_id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,'type' INTEGER NOT NULL,'rank' INTEGER NOT NULL);CREATE TABLE IF NOT EXISTS character_wish (item_id INTEGER NOT NULL,time TEXT(19) NOT NULL,id INTEGER PRIMARY KEY NOT NULL,CONSTRAINT FK FOREIGN KEY (item_id) REFERENCES item_list(item_id));CREATE TABLE IF NOT EXISTS weapon_wish (item_id INTEGER NOT NULL,time TEXT(19) NOT NULL,id INTEGER PRIMARY KEY NOT NULL,CONSTRAINT FK FOREIGN KEY (item_id) REFERENCES item_list(item_id));CREATE TABLE IF NOT EXISTS standard_wish (item_id INTEGER NOT NULL,time TEXT(19) NOT NULL,id INTEGER PRIMARY KEY NOT NULL,CONSTRAINT FK FOREIGN KEY (item_id) REFERENCES item_list(item_id));").unwrap();
+    let mut init_sql=String::from("PRAGMA foreign_keys=ON;CREATE TABLE IF NOT EXISTS item_list (item_id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,'type' INTEGER NOT NULL,'rank' INTEGER NOT NULL);");
+    for item in WISHES {
+        init_sql.push_str(&format!("CREATE TABLE IF NOT EXISTS {} (item_id INTEGER NOT NULL,time TEXT(19) NOT NULL,id INTEGER PRIMARY KEY NOT NULL,CONSTRAINT FK FOREIGN KEY (item_id) REFERENCES item_list(item_id));",item.table_name));
+    }
+    db.execute(init_sql).unwrap();
     *state.db.lock().await = Some(db);
     *state.raw_url.lock().await = raw_url;
     Ok(uid)
@@ -79,9 +84,7 @@ pub async fn prepare(state: State<'_, GenshinState>) -> Result<String, Error> {
 
 #[tauri::command]
 pub async fn get_wishes(window: Window, state: State<'_, GenshinState>) -> Result<(), Error> {
-    let end_id_character: i64;
-    let end_id_weapon: i64;
-    let end_id_standard: i64;
+    let mut ends = [0i64; 4];
     {
         let connection = state.db.lock().await;
         let connection = connection.as_ref().unwrap();
@@ -92,22 +95,18 @@ pub async fn get_wishes(window: Window, state: State<'_, GenshinState>) -> Resul
             statement.next().unwrap();
             statement.read::<i64, _>("id").unwrap()
         };
-        end_id_character = get_end_id(&CHARACTER_WISH.table_name);
-        end_id_weapon = get_end_id(&WEAPON_WISH.table_name);
-        end_id_standard = get_end_id(&STANDARD_WISH.table_name);
+        for (index, item) in WISHES.iter().enumerate() {
+            ends[index] = get_end_id(&item.table_name);
+        }
     }
     let string = state.raw_url.lock().await.clone();
     let str = Arc::new(string);
     let window = Arc::new(window);
-    for item in [
-        (&CHARACTER_WISH, end_id_character),
-        (&WEAPON_WISH, end_id_weapon),
-        (&STANDARD_WISH, end_id_standard),
-    ] {
+    for (index, item) in WISHES.iter().enumerate() {
         let db = Arc::clone(&state.db);
         let window = Arc::clone(&window);
         let strlc = Arc::clone(&str);
-        get_wish(db, strlc, window, item.0, item.1).await?;
+        get_wish(db, strlc, window, item, ends[index]).await?;
     }
     Ok(())
 }

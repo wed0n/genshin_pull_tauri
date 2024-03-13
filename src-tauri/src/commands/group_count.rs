@@ -1,7 +1,6 @@
-use crate::commands::{
-    Error, GenshinResult, GenshinState, Serialize, State, WishType, CHARACTER_WISH, STANDARD_WISH,
-    WEAPON_WISH,
-};
+use crate::commands::{Error, GenshinResult, GenshinState, Serialize, State, WishType};
+
+use super::make_genshin_result;
 
 #[derive(Serialize)]
 pub struct GenshinPie {
@@ -55,9 +54,5 @@ pub async fn group_count(
             weapon3,
         })
     };
-    Ok(GenshinResult {
-        character: closure(&CHARACTER_WISH)?,
-        weapon: closure(&WEAPON_WISH)?,
-        standard: closure(&STANDARD_WISH)?,
-    })
+    make_genshin_result(&closure)
 }

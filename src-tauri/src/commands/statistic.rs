@@ -1,6 +1,6 @@
 use crate::commands::{Error, GenshinState, Serialize, State};
 
-use super::GenshinTableItem;
+use super::{make_union_sql, GenshinTableItem, WishType};
 
 #[derive(Serialize)]
 pub struct GenshinStatisticItem {
@@ -26,7 +26,18 @@ pub async fn type_wishes(
         6 => "and `rank`!=5",
         _ => "",
     };
-    let mut statement=connection.prepare(format!("select name,`rank`,count(item_id) from(select name,`type`,`rank`,item_list.item_id from character_wish join item_list on character_wish.item_id=item_list.item_id union all select name,`type`,`rank`,item_list.item_id from weapon_wish join item_list on weapon_wish.item_id=item_list.item_id union all select name,`type`,`rank`,item_list.item_id from standard_wish join item_list on standard_wish.item_id=item_list.item_id) where `type`={} {} group by(item_id) order by count(item_id) desc,rank desc;",item_type,rank_condition))?;
+
+    let sql = make_union_sql(
+        "select name,`rank`,count(item_id) from( ",
+        &|wish_type: &WishType| {
+            format!("select name,`type`,`rank`,item_list.item_id from {} join item_list on {}.item_id=item_list.item_id",wish_type.table_name,wish_type.table_name)
+        },
+        &format!(
+            " ) where `type`={} {} group by(item_id) order by count(item_id) desc,rank desc;",
+            item_type, rank_condition
+        ),
+    );
+    let mut statement = connection.prepare(sql)?;
     let mut items: Vec<GenshinStatisticItem> = vec![];
     while let Ok(sqlite::State::Row) = statement.next() {
         let name = statement.read::<String, _>("name")?;
@@ -45,7 +56,15 @@ pub async fn item_wishes(
 ) -> Result<Vec<GenshinTableItem>, Error> {
     let connection = state.db.lock().await;
     let connection = connection.as_ref().unwrap();
-    let mut statement=connection.prepare(format!("select name,`type`,`rank`,time,gacha_type from( select name,`type`,`rank`,time,id,301 gacha_type from character_wish join item_list on character_wish.item_id=item_list.item_id union all select name,`type`,`rank`,time,id,302 gacha_type from weapon_wish join item_list on weapon_wish.item_id=item_list.item_id union all select name,`type`,`rank`,time,id,200 gacha_type from standard_wish join item_list on standard_wish.item_id=item_list.item_id ) where name=\"{}\" order by id desc;",name))?;
+
+    let sql = make_union_sql(
+        "select name,`type`,`rank`,time,gacha_type from( ",
+        &|wish_type: &WishType| {
+            format!("select name,`type`,`rank`,time,id,{} gacha_type from {} join item_list on {}.item_id=item_list.item_id",wish_type.gacha_type,wish_type.table_name,wish_type.table_name)
+        },
+        &format!(" ) where name=\"{}\" order by id desc;", name),
+    );
+    let mut statement = connection.prepare(sql)?;
     let mut items: Vec<GenshinTableItem> = vec![];
     while let sqlite::State::Row = statement.next()? {
         let item = GenshinTableItem {
