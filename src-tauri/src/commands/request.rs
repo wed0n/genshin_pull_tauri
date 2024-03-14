@@ -6,7 +6,7 @@ use regex::Regex;
 use tauri::Window;
 use tokio::time::{sleep, Duration};
 
-use super::WISHES;
+use super::{WISHES, WISHES_COUNT};
 
 #[derive(Deserialize)]
 struct GenshinResponse<T> {
@@ -84,7 +84,7 @@ pub async fn prepare(state: State<'_, GenshinState>) -> Result<String, Error> {
 
 #[tauri::command]
 pub async fn get_wishes(window: Window, state: State<'_, GenshinState>) -> Result<(), Error> {
-    let mut ends = [0i64; 4];
+    let mut ends = [0i64; WISHES_COUNT];
     {
         let connection = state.db.lock().await;
         let connection = connection.as_ref().unwrap();

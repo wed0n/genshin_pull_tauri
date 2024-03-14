@@ -43,7 +43,8 @@ static STANDARD_WISH: WishType = WishType {
     table_name: "standard_wish",
     gacha_name: "常驻祈愿",
 };
-static WISHES: [&WishType; 4] = [
+const WISHES_COUNT: usize = 4;
+static WISHES: [&WishType; WISHES_COUNT] = [
     &CHARACTER_WISH,
     &WEAPON_WISH,
     &CHRONICLE_WISH,
